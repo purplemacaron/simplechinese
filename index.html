@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SimpleChinese</title>
+    <meta name="description" content="한어병음, 로마자 변환, 주음부호, 오필자형 중국어 자판" />
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="brand"><span class="brandMark">SC</span> SimpleChinese</div>
+        <h1>중국어 입력을 가장 단순하게.</h1>
+        <p>한어병음, 로마자, 주음부호, 오필자형 자판을 파랑과 흰색의 깔끔한 화면에서 바로 사용하세요.</p>
+      </section>
+
+      <section class="workspace" aria-label="중국어 자판 작업 영역">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div class="panel">
+          <div class="panelHeader">
+            <div>
+              <span class="icon" id="modeIcon" aria-hidden="true"></span>
+              <h2 id="modeTitle"></h2>
+              <p id="modeDesc"></p>
+            </div>
+            <button class="toggle" id="upperBtn" type="button">대문자</button>
+          </div>
+          <textarea id="output" placeholder="여기에 입력하거나 아래 자판을 누르세요."></textarea>
+          <div class="actions">
+            <button id="copyBtn" type="button"><span class="icon copyIcon" aria-hidden="true"></span>복사</button>
+            <button id="backBtn" type="button"><span class="icon backIcon" aria-hidden="true"></span>지우기</button>
+            <button id="clearBtn" type="button"><span class="icon clearIcon" aria-hidden="true"></span>초기화</button>
+          </div>
+          <div class="toneBar" aria-label="성조 추가" id="toneBar"></div>
+          <div class="keys" id="keys"></div>
+        </div>
+      </section>
+    </main>
+    <script src="src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap');
+
+:root {
+  color: #0f2f5f;
+  background: #eef6ff;
+  font-family: 'Noto Sans KR', 'Noto Sans CJK KR', 'Source Han Sans KR', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, textarea { font: inherit; }
+button { cursor: pointer; border: 0; }
+
+.page {
+  min-height: 100vh;
+  padding: 40px clamp(16px, 4vw, 56px);
+  background:
+    radial-gradient(circle at top left, rgba(30, 119, 255, 0.20), transparent 34rem),
+    linear-gradient(135deg, #f8fbff 0%, #e8f3ff 100%);
+}
+
+.hero { max-width: 980px; margin: 0 auto 28px; text-align: center; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: #1c66d4; font-weight: 800; letter-spacing: -0.02em; }
+.brandMark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; color: white; background: #1768dc; box-shadow: 0 12px 28px rgba(23, 104, 220, .28); }
+h1 { margin: 18px 0 12px; color: #08285a; font-size: clamp(2.4rem, 7vw, 5.8rem); line-height: .98; letter-spacing: -0.08em; }
+.hero p { margin: 0 auto; max-width: 720px; color: #42658f; font-size: clamp(1rem, 2vw, 1.22rem); line-height: 1.7; }
+
+.workspace { max-width: 1120px; margin: 0 auto; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+.tab { padding: 15px 10px; border: 1px solid #c8dcf7; border-radius: 18px; color: #22558f; background: rgba(255,255,255,.76); font-weight: 700; }
+.tab.active { color: white; background: #1768dc; border-color: #1768dc; box-shadow: 0 16px 36px rgba(23,104,220,.24); }
+
+.panel { padding: clamp(18px, 3vw, 32px); border: 1px solid #c7dcf7; border-radius: 32px; background: rgba(255,255,255,.9); box-shadow: 0 30px 80px rgba(20, 75, 143, .16); backdrop-filter: blur(12px); }
+.panelHeader { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+.panelHeader > div { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; }
+.icon { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; color: #1768dc; background: #eaf3ff; font-weight: 800; }
+.copyIcon::before { content: '⧉'; }
+.backIcon::before { content: '⌫'; }
+.clearIcon::before { content: '×'; font-size: 1.35rem; }
+h2 { margin: 0; color: #08285a; font-size: clamp(1.35rem, 3vw, 2rem); letter-spacing: -0.04em; }
+.panelHeader p { grid-column: 2; margin: 2px 0 0; color: #58769d; }
+.toggle { min-width: 96px; padding: 12px 16px; border-radius: 999px; color: #1768dc; background: #eaf3ff; font-weight: 800; }
+.toggle.on { color: white; background: #0c55bd; }
+
+textarea { width: 100%; min-height: 180px; resize: vertical; padding: 20px; border: 2px solid #cfe1fa; border-radius: 24px; outline: none; color: #08285a; background: #fbfdff; font-size: 1.35rem; line-height: 1.65; }
+textarea:focus { border-color: #1768dc; box-shadow: 0 0 0 5px rgba(23,104,220,.12); }
+.actions, .toneBar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.actions button, .toneBar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 16px; color: #124889; background: #eaf3ff; font-weight: 800; }
+.actions button:first-child { color: white; background: #1768dc; }
+.toneBar button { background: white; border: 1px solid #c8dcf7; }
+
+.keys { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.keys button { min-height: 58px; border-radius: 18px; color: #0b3d78; background: #f4f9ff; border: 1px solid #d8e7fb; font-size: 1.12rem; font-weight: 800; box-shadow: inset 0 -2px 0 rgba(23,104,220,.08); }
+.keys button:hover, .actions button:hover, .toneBar button:hover, .tab:hover { transform: translateY(-1px); }
+.keys .wide { grid-column: span 2; color: white; background: #2f7dec; border-color: #2f7dec; }
+
+@media (max-width: 760px) {
+  .page { padding: 24px 12px; }
+  .tabs { grid-template-columns: 1fr 1fr; }
+  .panelHeader { flex-direction: column; }
+  .toggle { width: 100%; }
+  .keys { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .keys button { min-height: 52px; border-radius: 15px; }
+  textarea { min-height: 150px; font-size: 1.15rem; }
+}
+
+@media (max-width: 420px) {
+  .tabs { grid-template-columns: 1fr; }
+  .keys { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .keys .wide { grid-column: span 2; }
+  .actions button, .toneBar button { flex: 1 1 42%; }
+}
