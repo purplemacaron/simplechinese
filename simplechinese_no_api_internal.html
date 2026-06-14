@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimpleChinese</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg2: #f7f8fa;
+  --border: #e4e7ed;
+  --border2: #d0d5dd;
+  --text: #111827;
+  --text2: #4b5563;
+  --text3: #9ca3af;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --accent-hover: #1d4ed8;
+  --key-bg: #ffffff;
+  --key-hover: #f0f4ff;
+  --key-active: #dbeafe;
+  --red: #dc2626;
+  --green: #059669;
+  --amber: #d97706;
+  --purple: #7c3aed;
+  --font-ui: 'Noto Sans KR', system-ui, sans-serif;
+  --font-cn: 'Noto Sans SC', 'SimSun', 'STSong', sans-serif;
+  --r: 6px;
+  --r2: 10px;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* HEADER */
+header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.logo em { color: var(--accent); font-style: normal; }
+
+/* TABS */
+nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 20px;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.12s, border-color 0.12s;
+  user-select: none;
+}
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* MAIN */
+main { max-width: 900px; margin: 0 auto; padding: 16px 16px 60px; }
+
+/* OUTPUT */
+.output-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  margin-bottom: 12px;
+}
+.output-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.output-label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; }
+.output-btns { display: flex; gap: 6px; }
+.btn-sm {
+  padding: 5px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.btn-sm:hover { background: var(--bg2); border-color: var(--border2); }
+.btn-sm.del { color: var(--red); }
+.btn-sm.del:hover { background: #fef2f2; border-color: #fecaca; }
+
+.output-text {
+  padding: 16px;
+  min-height: 72px;
+  font-family: var(--font-cn);
+  font-size: 28px;
+  color: var(--text);
+  line-height: 1.5;
+  word-break: break-all;
+  letter-spacing: 1px;
+  white-space: pre-wrap;
+}
+.output-text:empty::before {
+  content: '출력 영역';
+  color: var(--text3);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* PANEL */
+.panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  display: none;
+}
+.panel.active { display: block; }
+
+.panel-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.panel-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.panel-sub { font-size: 11px; color: var(--text3); }
+
+/* BUFFER BAR */
+.buffer-bar {
+  padding: 8px 14px;
+  background: var(--accent-light);
+  border-bottom: 1px solid #bfdbfe;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+.buffer-bar.visible { display: flex; }
+.buffer-text { font-family: var(--font-ui); }
+
+/* CANDIDATES */
+.candidates {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  display: none;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 44px;
+  background: var(--bg2);
+}
+.candidates.visible { display: flex; }
+.cand {
+  padding: 4px 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-cn);
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.1s;
+}
+.cand:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.cand-loading { font-size: 12px; color: var(--text3); font-family: var(--font-ui); }
+
+/* TONE ROW */
+.tone-row {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--bg2);
+}
+.tone-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-right: 2px; }
+.tone-btn {
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-cn);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.1s;
+}
+.tone-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.tone-btn.sel { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+/* KEYBOARD */
+.kb-wrap { padding: 12px 10px; overflow-x: auto; }
+.kb { display: flex; flex-direction: column; gap: 5px; min-width: 280px; }
+.kb-row { display: flex; gap: 4px; justify-content: center; }
+
+.key {
+  height: 40px;
+  min-width: 34px;
+  padding: 0 5px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--key-bg);
+  cursor: pointer;
+  font-family: var(--font-cn);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.08s, border-color 0.08s, transform 0.06s;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.key:hover { background: var(--key-hover); border-color: #93c5fd; transform: translateY(-1px); }
+.key:active { background: var(--key-active); transform: translateY(0); }
+.key .sub { font-size: 9px; color: var(--text3); line-height: 1; font-family: var(--font-ui); }
+.key .mc { font-size: 14px; line-height: 1; }
+.key.sp { background: var(--bg2); color: var(--text2); font-family: var(--font-ui); font-size: 11px; min-width: 46px; }
+.key.sp:hover { background: #e9ecf0; }
+.key.wide { min-width: 54px; }
+.key.wider { min-width: 68px; }
+.key.space-key { flex: 1; max-width: 240px; font-size: 12px; color: var(--text3); font-family: var(--font-ui); }
+.key.enter-key { background: var(--accent); color: white; border-color: var(--accent-hover); min-width: 68px; font-family: var(--font-ui); font-size: 11px; }
+.key.enter-key:hover { background: var(--accent-hover); }
+.key.on { background: var(--key-active); border-color: var(--accent); color: var(--accent); }
+
+/* WUBI colors */
+.w1 { color: #1D4ED8; }
+.w2 { color: #059669; }
+.w3 { color: #D97706; }
+.w4 { color: #DC2626; }
+.w5 { color: #7C3AED; }
+
+/* INFO */
+.info-bar {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--bg2);
+  border-radius: 0 0 var(--r2) var(--r2);
+}
+
+/* MODIFIER */
+.mod-row {
+  padding: 8px 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+}
+.mod-btn {
+  padding: 5px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.mod-btn:hover { background: var(--bg2); }
+.mod-btn.on { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--text);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 600px) {
+  header { padding: 0 14px; }
+  nav { padding: 0 10px; }
+  main { padding: 12px 10px 60px; }
+  .key { height: 36px; min-width: 28px; font-size: 12px; }
+  .output-text { font-size: 22px; }
+  .kb-wrap { padding: 10px 6px; }
+  .kb-row { gap: 3px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Simple<em>Chinese</em></div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab(this,'pinyin')">한어병음</div>
+  <div class="tab" onclick="switchTab(this,'roman')">로마자 자판</div>
+  <div class="tab" onclick="switchTab(this,'bopomofo')">주음부호</div>
+  <div class="tab" onclick="switchTab(this,'wubi')">오필자형</div>
+</nav>
+
+<main>
+  <!-- OUTPUT -->
+  <div class="output-box">
+    <div class="output-bar">
+      <span class="output-label">출력</span>
+      <div class="output-btns">
+        <button class="btn-sm" onclick="copyOut()">복사</button>
+        <button class="btn-sm del" onclick="clearOut()">지우기</button>
+      </div>
+    </div>
+    <div class="output-text" id="out"></div>
+  </div>
+
+  <!-- 한어병음 -->
+  <div class="panel active" id="panel-pinyin">
+    <div class="panel-head">
+      <span class="panel-title">한어병음 (Pīnyīn)</span>
+      <span class="panel-sub">성모·운모 입력 후 성조 선택 — 또는 키보드로 직접 입력</span>
+    </div>
+    <div class="tone-row">
+      <span class="tone-label">성조</span>
+      <button class="tone-btn" data-t="1" onclick="pyTone(1)">ā ē ī ō ū &nbsp;1성</button>
+      <button class="tone-btn" data-t="2" onclick="pyTone(2)">á é í ó ú &nbsp;2성</button>
+      <button class="tone-btn" data-t="3" onclick="pyTone(3)">ǎ ě ǐ ǒ ǔ &nbsp;3성</button>
+      <button class="tone-btn" data-t="4" onclick="pyTone(4)">à è ì ò ù &nbsp;4성</button>
+      <button class="tone-btn" data-t="5" onclick="pyTone(5)">경성 (무표)</button>
+    </div>
+    <div class="buffer-bar" id="py-buf-bar">
+      <span class="buffer-text" id="py-buf-txt"></span>
+    </div>
+    <div class="kb-wrap">
+      <div class="kb">
+        <div class="kb-row">
+          <div class="key" onclick="pyIn('q')"><span class="mc">q</span></div>
+          <div class="key" onclick="pyIn('w')"><span class="mc">w</span></div>
+          <div class="key" onclick="pyIn('e')"><span class="mc">e</span></div>
+          <div class="key" onclick="pyIn('r')"><span class="mc">r</span></div>
+          <div class="key" onclick="pyIn('t')"><span class="mc">t</span></div>
+          <div class="key" onclick="pyIn('y')"><span class="mc">y</span></div>
+          <div class="key" onclick="pyIn('u')"><span class="mc">u</span><span class="sub">ü</span></div>
+          <div class="key" onclick="pyIn('i')"><span class="mc">i</span></div>
+          <div class="key" onclick="pyIn('o')"><span class="mc">o</span></div>
+          <div class="key" onclick="pyIn('p')"><span class="mc">p</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key" onclick="pyIn('a')"><span class="mc">a</span></div>
+          <div class="key" onclick="pyIn('s')"><span class="mc">s</span></div>
+          <div class="key" onclick="pyIn('d')"><span class="mc">d</span></div>
+          <div class="key" onclick="pyIn('f')"><span class="mc">f</span></div>
+          <div class="key" onclick="pyIn('g')"><span class="mc">g</span></div>
+          <div class="key" onclick="pyIn('h')"><span class="mc">h</span></div>
+          <div class="key" onclick="pyIn('j')"><span class="mc">j</span></div>
+          <div class="key" onclick="pyIn('k')"><span class="mc">k</span></div>
+          <div class="key" onclick="pyIn('l')"><span class="mc">l</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key sp wide" id="py-shift" onclick="pyToggleCaps()">Shift</div>
+          <div class="key" onclick="pyIn('z')"><span class="mc">z</span><span class="sub">zh</span></div>
+          <div class="key" onclick="pyIn('x')"><span class="mc">x</span></div>
+          <div class="key" onclick="pyIn('c')"><span class="mc">c</span><span class="sub">ch</span></div>
+          <div class="key" onclick="pyIn('v')"><span class="mc">v</span><span class="sub">ü</span></div>
+          <div class="key" onclick="pyIn('b')"><span class="mc">b</span></div>
+          <div class="key" onclick="pyIn('n')"><span class="mc">n</span><span class="sub">ng</span></div>
+          <div class="key" onclick="pyIn('m')"><span class="mc">m</span></div>
+          <div class="key sp wide" onclick="pyBS()">←</div>
+        </div>
+        <div class="kb-row">
+          <div class="key space-key" onclick="pyCommit(true)">확정 / 공백</div>
+          <div class="key enter-key" onclick="pyNewline()">줄바꿈</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 로마자 자판 -->
+  <div class="panel" id="panel-roman">
+    <div class="panel-head">
+      <span class="panel-title">로마자 자판</span>
+      <span class="panel-sub"></span>
+    </div>
+    <div class="buffer-bar visible" id="rom-buf-bar">
+      <span class="buffer-text" id="rom-buf-txt">입력 대기 중…</span>
+    </div>
+        <div class="kb-wrap">
+      <div class="kb">
+        <div class="kb-row">
+          <div class="key" onclick="romIn('q')"><span class="mc">q</span></div>
+          <div class="key" onclick="romIn('w')"><span class="mc">w</span></div>
+          <div class="key" onclick="romIn('e')"><span class="mc">e</span></div>
+          <div class="key" onclick="romIn('r')"><span class="mc">r</span></div>
+          <div class="key" onclick="romIn('t')"><span class="mc">t</span></div>
+          <div class="key" onclick="romIn('y')"><span class="mc">y</span></div>
+          <div class="key" onclick="romIn('u')"><span class="mc">u</span></div>
+          <div class="key" onclick="romIn('i')"><span class="mc">i</span></div>
+          <div class="key" onclick="romIn('o')"><span class="mc">o</span></div>
+          <div class="key" onclick="romIn('p')"><span class="mc">p</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key" onclick="romIn('a')"><span class="mc">a</span></div>
+          <div class="key" onclick="romIn('s')"><span class="mc">s</span></div>
+          <div class="key" onclick="romIn('d')"><span class="mc">d</span></div>
+          <div class="key" onclick="romIn('f')"><span class="mc">f</span></div>
+          <div class="key" onclick="romIn('g')"><span class="mc">g</span></div>
+          <div class="key" onclick="romIn('h')"><span class="mc">h</span></div>
+          <div class="key" onclick="romIn('j')"><span class="mc">j</span></div>
+          <div class="key" onclick="romIn('k')"><span class="mc">k</span></div>
+          <div class="key" onclick="romIn('l')"><span class="mc">l</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key sp wide">Shift</div>
+          <div class="key" onclick="romIn('z')"><span class="mc">z</span></div>
+          <div class="key" onclick="romIn('x')"><span class="mc">x</span></div>
+          <div class="key" onclick="romIn('c')"><span class="mc">c</span></div>
+          <div class="key" onclick="romIn('v')"><span class="mc">v</span></div>
+          <div class="key" onclick="romIn('b')"><span class="mc">b</span></div>
+          <div class="key" onclick="romIn('n')"><span class="mc">n</span></div>
+          <div class="key" onclick="romIn('m')"><span class="mc">m</span></div>
+          <div class="key sp wide" onclick="romBS()">←</div>
+        </div>
+        <div class="kb-row">
+          <div class="key sp wider" onclick="romCommit(true)">확정 / 공백</div>
+          <div class="key space-key" onclick="romCommit(true)">확정 / 공백</div>
+          <div class="key enter-key" onclick="romNewline()">줄바꿈</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 주음부호 -->
+  <div class="panel" id="panel-bopomofo">
+    <div class="panel-head">
+      <span class="panel-title">주음부호 (注音符號)</span>
+      <span class="panel-sub">대만 표준 자판 — 성모 → 운모 → 성조 순으로 클릭</span>
+    </div>
+    <div class="tone-row">
+      <span class="tone-label">성조</span>
+      <button class="tone-btn" onclick="addOut('ˉ')">ˉ 1성</button>
+      <button class="tone-btn" onclick="addOut('ˊ')">ˊ 2성</button>
+      <button class="tone-btn" onclick="addOut('ˇ')">ˇ 3성</button>
+      <button class="tone-btn" onclick="addOut('ˋ')">ˋ 4성</button>
+      <button class="tone-btn" onclick="addOut('˙')">˙ 경성</button>
+    </div>
+    <div class="kb-wrap">
+      <div class="kb">
+        <div class="kb-row">
+          <div class="key" onclick="addOut('ㄅ')"><span class="mc">ㄅ</span><span class="sub">b</span></div>
+          <div class="key" onclick="addOut('ㄆ')"><span class="mc">ㄆ</span><span class="sub">p</span></div>
+          <div class="key" onclick="addOut('ㄇ')"><span class="mc">ㄇ</span><span class="sub">m</span></div>
+          <div class="key" onclick="addOut('ㄈ')"><span class="mc">ㄈ</span><span class="sub">f</span></div>
+          <div class="key" onclick="addOut('ㄉ')"><span class="mc">ㄉ</span><span class="sub">d</span></div>
+          <div class="key" onclick="addOut('ㄊ')"><span class="mc">ㄊ</span><span class="sub">t</span></div>
+          <div class="key" onclick="addOut('ㄋ')"><span class="mc">ㄋ</span><span class="sub">n</span></div>
+          <div class="key" onclick="addOut('ㄌ')"><span class="mc">ㄌ</span><span class="sub">l</span></div>
+          <div class="key" onclick="addOut('ㄍ')"><span class="mc">ㄍ</span><span class="sub">g</span></div>
+          <div class="key" onclick="addOut('ㄎ')"><span class="mc">ㄎ</span><span class="sub">k</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key" onclick="addOut('ㄏ')"><span class="mc">ㄏ</span><span class="sub">h</span></div>
+          <div class="key" onclick="addOut('ㄐ')"><span class="mc">ㄐ</span><span class="sub">j</span></div>
+          <div class="key" onclick="addOut('ㄑ')"><span class="mc">ㄑ</span><span class="sub">q</span></div>
+          <div class="key" onclick="addOut('ㄒ')"><span class="mc">ㄒ</span><span class="sub">x</span></div>
+          <div class="key" onclick="addOut('ㄓ')"><span class="mc">ㄓ</span><span class="sub">zh</span></div>
+          <div class="key" onclick="addOut('ㄔ')"><span class="mc">ㄔ</span><span class="sub">ch</span></div>
+          <div class="key" onclick="addOut('ㄕ')"><span class="mc">ㄕ</span><span class="sub">sh</span></div>
+          <div class="key" onclick="addOut('ㄖ')"><span class="mc">ㄖ</span><span class="sub">r</span></div>
+          <div class="key" onclick="addOut('ㄗ')"><span class="mc">ㄗ</span><span class="sub">z</span></div>
+          <div class="key" onclick="addOut('ㄘ')"><span class="mc">ㄘ</span><span class="sub">c</span></div>
+        </div>
+        <div class="kb-row">
+          <div class="key" onclick="addOut('ㄙ')"><span class="mc">ㄙ</span><span class="sub">s</span></div>
+          <div class="key" onclick="addOut('ㄧ')"><span class="mc">ㄧ</span><span class="sub">i</span></div>
+          <div class="key" onclick="addOut('ㄨ')"><span class="mc">ㄨ</span><span class="sub">u</span></div>
+          <div class="key" onclick="addOut('ㄩ')"><span class="mc">ㄩ</span><span class="sub">ü</span></div>
+          <div class="key" onclick="addOut('ㄚ')"><span class="mc">ㄚ</span><span class="sub">a</span></div>
+          <div class="key" onclick="addOut('ㄛ')"><span class="mc">ㄛ</span><span class="sub">o</span></div>
+          <div class="key" onclick="addOut('ㄜ')"><span class="mc">ㄜ</span><span class="sub">e</span></div>
+          <div class="key" onclick="addOut('ㄝ')"><span class="mc">ㄝ</span><span class="sub">ê</span></div>
+          <div class="key" onclick="addOut('ㄞ')"><span class="mc">ㄞ</span><span class="sub">ai</span></div>
+          <div class="key sp" onclick="bpBS()">←</div>
+        </div>
+        <div class="kb-row">
+          <div class="key" onclick="addOut('ㄟ')"><span class="mc">ㄟ</span><span class="sub">ei</span></div>
+          <div class="key" onclick="addOut('ㄠ')"><span class="mc">ㄠ</span><span class="sub">ao</span></div>
+          <div class="key" onclick="addOut('ㄡ')"><span class="mc">ㄡ</span><span class="sub">ou</span></div>
+          <div class="key" onclick="addOut('ㄢ')"><span class="mc">ㄢ</span><span class="sub">an</span></div>
+          <div class="key" onclick="addOut('ㄣ')"><span class="mc">ㄣ</span><span class="sub">en</span></div>
+          <div class="key" onclick="addOut('ㄤ')"><span class="mc">ㄤ</span><span class="sub">ang</span></div>
+          <div class="key" onclick="addOut('ㄥ')"><span class="mc">ㄥ</span><span class="sub">eng</span></div>
+          <div class="key" onclick="addOut('ㄦ')"><span class="mc">ㄦ</span><span class="sub">er</span></div>
+          <div class="key space-key" onclick="addOut(' ')">빈칸</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 오필자형 -->
+  <div class="panel" id="panel-wubi">
+    <div class="panel-head">
+      <span class="panel-title">오필자형 (五笔字型 · Wubi 86)</span>
+      <span class="panel-sub">획 분류 기반 — 1횡 2종 3삐침 4파임 5꺾임</span>
+    </div>
+    <div class="tone-row" style="gap:10px;">
+      <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#eff6ff;color:#1D4ED8;font-weight:600;">1 횡</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#ecfdf5;color:#059669;font-weight:600;">2 종</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#fffbeb;color:#D97706;font-weight:600;">3 삐침</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#fef2f2;color:#DC2626;font-weight:600;">4 파임</span>
+      <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#f5f3ff;color:#7C3AED;font-weight:600;">5 꺾임</span>
+    </div>
+    <div class="kb-wrap">
+      <div class="kb">
+        <div class="kb-row" id="wu-r1"></div>
+        <div class="kb-row" id="wu-r2"></div>
+        <div class="kb-row" id="wu-r3"></div>
+        <div class="kb-row">
+          <div class="key sp wider" onclick="addOut(' ')">빈칸</div>
+          <div class="key space-key" onclick="wuCommit()">확정 (공백 추가)</div>
+          <div class="key enter-key" onclick="addOut('\n')">줄바꿈</div>
+        </div>
+      </div>
+    </div>
+    <div class="mod-row">
+      <button class="mod-btn" id="wu-caps-btn" onclick="wuToggleCaps()">대문자</button>
+    </div>
+    
+  </div>
+</main>
+
+<div class="toast" id="toast">복사했습니다</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+let outText = '';
+let pyCaps = false;
+let pyBuf = '';
+
+let romBuf = '';
+
+let wuCaps = false;
+
+// ── OUTPUT ─────────────────────────────────────────────
+function renderOut() {
+  document.getElementById('out').textContent = outText;
+}
+function addOut(ch) {
+  outText += ch;
+  renderOut();
+}
+function clearOut() {
+  outText = '';
+  pyBuf = '';
+  romBuf = '';
+  updatePyBuf();
+  updateRomBuf();
+  renderOut();
+}
+function copyOut() {
+  if (!outText) return;
+  navigator.clipboard.writeText(outText).then(showToast).catch(() => {
+    const t = document.createElement('textarea');
+    t.value = outText;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand('copy');
+    document.body.removeChild(t);
+    showToast();
+  });
+}
+function showToast() {
+  const el = document.getElementById('toast');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1600);
+}
+
+// ── TABS ───────────────────────────────────────────────
+function switchTab(el, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+  // reset buffers on switch
+  pyBuf = '';
+  romBuf = '';
+  updatePyBuf();
+  updateRomBuf();
+}
+
+// ── TONE MAP ───────────────────────────────────────────
+const TM = {
+  a: ['ā','á','ǎ','à','a'],
+  e: ['ē','é','ě','è','e'],
+  i: ['ī','í','ǐ','ì','i'],
+  o: ['ō','ó','ǒ','ò','o'],
+  u: ['ū','ú','ǔ','ù','u'],
+  v: ['ǖ','ǘ','ǚ','ǜ','ü'],
+};
+const VOWEL_ORDER = ['a','o','e','i','u','v'];
+
+function applyTone(buf, tone) {
+  if (!tone || tone === 5) return buf;
+  const b = buf.toLowerCase();
+  for (const v of VOWEL_ORDER) {
+    const idx = b.indexOf(v);
+    if (idx !== -1 && TM[v]) {
+      return buf.slice(0, idx) + TM[v][tone - 1] + buf.slice(idx + 1);
+    }
+  }
+  return buf;
+}
+
+// ── PINYIN ─────────────────────────────────────────────
+const ROMAN_VOWELS = /[aeiouvü]/i;
+const ROMAN_CONSONANT_RE = /^[bcdfghjklmnpqrstvwxyz]$/i;
+
+function isRomanConsonant(ch) {
+  return ROMAN_CONSONANT_RE.test(ch);
+}
+function hasRomanVowel(buf) {
+  return ROMAN_VOWELS.test(buf);
+}
+function shouldAutoCommitPinyin(buf, ch) {
+  if (!buf || !isRomanConsonant(ch) || !hasRomanVowel(buf)) return false;
+  const lowerBuf = buf.toLowerCase();
+  const lowerCh = ch.toLowerCase();
+  if (lowerBuf.endsWith('n') && lowerCh === 'g') return false;
+  if (lowerBuf === 'e' && lowerCh === 'r') return false;
+  return true;
+}
+
+function pyIn(ch) {
+  if (pyCaps) ch = ch.toUpperCase();
+  if (shouldAutoCommitPinyin(pyBuf, ch)) {
+    addOut(pyBuf);
+    pyBuf = '';
+  }
+  pyBuf += ch;
+  updatePyBuf();
+}
+function pyBS() {
+  if (pyBuf.length > 0) {
+    pyBuf = pyBuf.slice(0, -1);
+    updatePyBuf();
+  } else {
+    outText = outText.slice(0, -1);
+    renderOut();
+  }
+}
+function pyTone(n) {
+  document.querySelectorAll('#panel-pinyin .tone-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelector(`#panel-pinyin .tone-btn[data-t="${n}"]`).classList.add('sel');
+  if (pyBuf.length > 0) {
+    addOut(applyTone(pyBuf, n));
+    pyBuf = '';
+    updatePyBuf();
+  }
+}
+function pyCommit(addSpace = false) {
+  if (pyBuf) {
+    addOut(pyBuf);
+    pyBuf = '';
+    updatePyBuf();
+  }
+  if (addSpace) addOut(' ');
+}
+function pyNewline() {
+  if (pyBuf) { addOut(pyBuf); pyBuf = ''; updatePyBuf(); }
+  addOut('\n');
+}
+function pyToggleCaps() {
+  setPyCaps(!pyCaps);
+}
+function updatePyBuf() {
+  const bar = document.getElementById('py-buf-bar');
+  const txt = document.getElementById('py-buf-txt');
+  if (pyBuf) {
+    bar.classList.add('visible');
+    txt.textContent = pyBuf;
+  } else {
+    bar.classList.remove('visible');
+    txt.textContent = '';
+  }
+}
+
+// ── ROMAN KEYBOARD ──────────────────────────────────
+function romIn(ch) {
+  romBuf += ch.toLowerCase();
+  updateRomBuf();
+}
+function romBS() {
+  if (romBuf.length > 0) {
+    romBuf = romBuf.slice(0, -1);
+    updateRomBuf();
+  } else {
+    outText = outText.slice(0, -1);
+    renderOut();
+  }
+}
+function romCommit(addSpace = false) {
+  if (romBuf) {
+    addOut(romBuf);
+    romBuf = '';
+    updateRomBuf();
+  }
+  if (addSpace) addOut(' ');
+}
+function romNewline() {
+  if (romBuf) {
+    addOut(romBuf);
+    romBuf = '';
+    updateRomBuf();
+  }
+  addOut('\\n');
+}
+function updateRomBuf() {
+  const txt = document.getElementById('rom-buf-txt');
+  txt.textContent = romBuf ? romBuf : '입력 대기 중…';
+}
+
+function setPyCaps(next) {
+  pyCaps = next;
+  document.getElementById('py-shift').classList.toggle('on', pyCaps);
+}
+function setWuCaps(next) {
+  if (wuCaps === next) return;
+  wuCaps = next;
+  document.getElementById('wu-caps-btn').classList.toggle('on', wuCaps);
+  buildWubi();
+}
+function addLiteralKey(key) {
+  if (key.length === 1) addOut(key);
+}
+
+document.addEventListener('keydown', e => {
+  const activeTab = document.querySelector('.tab.active');
+  if (!activeTab) return;
+
+  // 브라우저 기본 단축키는 막지 않음
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  const tabName = activeTab.textContent.trim();
+
+  if (tabName === '로마자 자판') {
+    if (e.key === 'Backspace') { e.preventDefault(); romBS(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); romNewline(); return; }
+    if (e.key === ' ') { e.preventDefault(); romCommit(true); return; }
+    if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); romIn(e.key.toLowerCase()); return; }
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); addOut(e.key); return; }
+    if (e.key.length === 1) { e.preventDefault(); addOut(e.key); }
+    return;
+  }
+
+  if (tabName === '한어병음') {
+    if (e.key === 'Shift') { setPyCaps(true); return; }
+    if (e.key === 'Backspace') { e.preventDefault(); pyBS(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); pyNewline(); return; }
+    if (e.key === ' ') { e.preventDefault(); pyCommit(true); return; }
+    if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); pyIn(e.key.toLowerCase()); return; }
+    if (/^[1-5]$/.test(e.key)) {
+      e.preventDefault();
+      if (pyBuf) pyTone(Number(e.key));
+      else addOut(e.key);
+      return;
+    }
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); addOut(e.key); return; }
+    if (e.key.length === 1) { e.preventDefault(); addOut(e.key); }
+    return;
+  }
+
+  if (tabName === '오필자형') {
+    if (e.key === 'Shift') { setWuCaps(true); return; }
+    if (e.key === 'Backspace') { e.preventDefault(); wuBS(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); addOut('\n'); return; }
+    if (e.key === ' ') { e.preventDefault(); wuCommit(); return; }
+    if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); wuIn(e.key); return; }
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); addOut(e.key); return; }
+    if (e.key.length === 1) { e.preventDefault(); addOut(e.key); }
+    return;
+  }
+
+  if (tabName === '주음부호') {
+    if (e.key === 'Backspace') { e.preventDefault(); bpBS(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); addOut('\n'); return; }
+    if (e.key === ' ') { e.preventDefault(); addOut(' '); return; }
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); addOut(e.key); return; }
+    if (e.key.length === 1) { e.preventDefault(); addOut(e.key); }
+  }
+});
+
+document.addEventListener('keyup', e => {
+  const activeTab = document.querySelector('.tab.active');
+  if (!activeTab) return;
+  const tabName = activeTab.textContent.trim();
+
+  if (tabName === '한어병음' && e.key === 'Shift') setPyCaps(false);
+  if (tabName === '오필자형' && e.key === 'Shift') setWuCaps(false);
+});
+
+// ── BOPOMOFO ───────────────────────────────────────────
+function bpBS() {
+  outText = outText.slice(0, -1);
+  renderOut();
+}
+
+// ── WUBI ───────────────────────────────────────────────
+const WU_DATA = [
+  [
+    { k:'Q', r:'金', c:'w5' }, { k:'W', r:'人', c:'w3' }, { k:'E', r:'月', c:'w3' },
+    { k:'R', r:'白', c:'w3' }, { k:'T', r:'禾', c:'w3' }, { k:'Y', r:'言', c:'w4' },
+    { k:'U', r:'立', c:'w4' }, { k:'I', r:'水', c:'w4' }, { k:'O', r:'火', c:'w4' },
+    { k:'P', r:'之', c:'w4' },
+  ],
+  [
+    { k:'A', r:'工', c:'w1' }, { k:'S', r:'木', c:'w1' }, { k:'D', r:'大', c:'w1' },
+    { k:'F', r:'土', c:'w1' }, { k:'G', r:'王', c:'w1' }, { k:'H', r:'目', c:'w2' },
+    { k:'J', r:'日', c:'w2' }, { k:'K', r:'口', c:'w2' }, { k:'L', r:'田', c:'w2' },
+  ],
+  [
+    { k:'Z', r:'之', c:'w5' }, { k:'X', r:'纟', c:'w5' }, { k:'C', r:'又', c:'w5' },
+    { k:'V', r:'女', c:'w5' }, { k:'B', r:'子', c:'w5' }, { k:'N', r:'己', c:'w2' },
+    { k:'M', r:'山', c:'w2' },
+  ]
+];
+
+let wuBuf = '';
+
+function buildWubi() {
+  WU_DATA.forEach((row, ri) => {
+    const rowEl = document.getElementById(`wu-r${ri + 1}`);
+    rowEl.innerHTML = '';
+
+    if (ri === 2) {
+      // Shift key
+      const sh = document.createElement('div');
+      sh.className = 'key sp wide';
+      sh.textContent = 'Shift';
+      sh.onclick = wuToggleCaps;
+      rowEl.appendChild(sh);
+    }
+
+    row.forEach(info => {
+      const k = document.createElement('div');
+      k.className = 'key';
+      const label = wuCaps ? info.k : info.k.toLowerCase();
+      k.innerHTML = `<span class="mc ${info.c}">${label}</span><span class="sub" style="font-family:var(--font-cn);">${info.r}</span>`;
+      k.onclick = () => wuIn(info.k);
+      rowEl.appendChild(k);
+    });
+
+    if (ri === 2) {
+      const bs = document.createElement('div');
+      bs.className = 'key sp wide';
+      bs.textContent = '←';
+      bs.onclick = wuBS;
+      rowEl.appendChild(bs);
+    }
+  });
+}
+function wuIn(ch) {
+  const c = wuCaps ? ch.toUpperCase() : ch.toLowerCase();
+  wuBuf += c;
+  addOut(c);
+}
+function wuBS() {
+  if (wuBuf.length > 0) {
+    wuBuf = wuBuf.slice(0, -1);
+    outText = outText.slice(0, -1);
+    renderOut();
+  } else {
+    outText = outText.slice(0, -1);
+    renderOut();
+  }
+}
+function wuCommit() {
+  wuBuf = '';
+  addOut(' ');
+}
+function wuToggleCaps() {
+  setWuCaps(!wuCaps);
+}
+
+// INIT
+buildWubi();
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
