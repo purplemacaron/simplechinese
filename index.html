@@ -1,1 +1,524 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SimpleChinese | 중국어 입력 자판</title>
+  <meta name="description" content="한어병음, 로마자 변환, 주음부호, 오필자형을 한 곳에서 쓰는 중국어 입력 자판입니다." />
+  <style>
+    :root {
+      --blue-950: #0b1f4d;
+      --blue-900: #12316f;
+      --blue-700: #1d5ed8;
+      --blue-600: #2874f0;
+      --blue-100: #eaf2ff;
+      --blue-50: #f5f9ff;
+      --white: #ffffff;
+      --gray-900: #162033;
+      --gray-600: #5c6a80;
+      --gray-300: #d7e1ef;
+      --shadow: 0 18px 50px rgba(18, 49, 111, 0.16);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans CJK KR", "Noto Sans CJK SC", "Noto Sans KR", "Noto Sans SC", "Source Han Sans KR", "Source Han Sans SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--gray-900);
+      background:
+        radial-gradient(circle at top left, rgba(40, 116, 240, 0.20), transparent 36rem),
+        linear-gradient(180deg, var(--blue-50) 0%, var(--white) 46%, var(--blue-50) 100%);
+    }
+
+    button, textarea, input, select { font: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 44px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 34px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--blue-950);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--blue-900), var(--blue-600));
+      box-shadow: 0 10px 26px rgba(29, 94, 216, 0.24);
+    }
+
+    .brand-mark svg { width: 25px; height: 25px; }
+
+    .header-link {
+      text-decoration: none;
+      color: var(--blue-700);
+      font-weight: 800;
+      padding: 11px 16px;
+      border: 1px solid var(--gray-300);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: stretch;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(215, 225, 239, 0.9);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .intro { padding: clamp(28px, 5vw, 52px); }
+
+    .eyebrow {
+      color: var(--blue-700);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      color: var(--blue-950);
+      font-size: clamp(2.25rem, 6vw, 4.8rem);
+      line-height: 0.98;
+      letter-spacing: -0.075em;
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--gray-600);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.75;
+      max-width: 58ch;
+      word-break: keep-all;
+    }
+
+    .feature-card {
+      padding: 28px;
+      display: grid;
+      align-content: center;
+      gap: 16px;
+      background: linear-gradient(145deg, var(--blue-900), var(--blue-600));
+      color: var(--white);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .feature-card::after {
+      content: "";
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      border: 34px solid rgba(255, 255, 255, 0.10);
+      border-radius: 50%;
+      right: -86px;
+      top: -84px;
+    }
+
+    .feature-card h2 { margin: 0; font-size: 1.45rem; letter-spacing: -0.04em; }
+    .feature-card p { margin: 0; line-height: 1.7; color: rgba(255, 255, 255, 0.82); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+    .chip {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .tabs { padding: 16px; position: sticky; top: 18px; }
+
+    .tab-button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--gray-600);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .tab-button + .tab-button { margin-top: 6px; }
+    .tab-button.active { color: var(--blue-950); background: var(--blue-100); }
+    .tab-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: var(--white);
+      color: var(--blue-700);
+      border: 1px solid var(--gray-300);
+    }
+    .tab-button.active .tab-icon { background: var(--blue-700); color: var(--white); border-color: var(--blue-700); }
+    .tab-icon svg { width: 20px; height: 20px; }
+    .tab-sub { display: block; font-size: 0.82rem; font-weight: 600; color: var(--gray-600); margin-top: 2px; }
+
+    .tool { padding: clamp(18px, 3vw, 28px); }
+    .tool-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 18px; }
+    .tool h2 { margin: 0 0 8px; color: var(--blue-950); letter-spacing: -0.045em; font-size: clamp(1.55rem, 4vw, 2.35rem); }
+    .tool-desc { margin: 0; color: var(--gray-600); line-height: 1.65; }
+
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    label { display: block; font-weight: 900; color: var(--blue-950); margin-bottom: 8px; }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      color: var(--gray-900);
+      background: var(--blue-50);
+      outline: none;
+      line-height: 1.7;
+      font-size: 1.04rem;
+    }
+    textarea:focus { border-color: var(--blue-600); box-shadow: 0 0 0 4px rgba(40, 116, 240, 0.13); background: var(--white); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-weight: 900;
+      cursor: pointer;
+      color: var(--white);
+      background: var(--blue-700);
+    }
+    .btn.secondary { color: var(--blue-700); background: var(--blue-100); }
+    .btn.ghost { color: var(--gray-600); background: transparent; border: 1px solid var(--gray-300); }
+
+    .option-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-600);
+      font-weight: 800;
+      background: var(--white);
+    }
+    .toggle input { accent-color: var(--blue-700); }
+
+    .keyboard { display: grid; gap: 8px; margin-top: 18px; }
+    .key-row { display: flex; justify-content: center; gap: 8px; }
+    .key {
+      min-width: 42px;
+      min-height: 42px;
+      border: 1px solid var(--gray-300);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--blue-950);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(18, 49, 111, 0.08);
+    }
+    .key.wide { min-width: 76px; }
+    .key:hover, .btn:hover, .tab-button:hover { transform: translateY(-1px); }
+
+    .status { min-height: 24px; color: var(--blue-700); font-weight: 800; margin-left: 6px; }
+    .hidden { display: none; }
+
+    footer { text-align: center; color: var(--gray-600); margin-top: 30px; line-height: 1.6; }
+
+    @media (max-width: 900px) {
+      .hero, .workspace, .field-grid { grid-template-columns: 1fr; }
+      .tabs { position: static; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .tab-button + .tab-button { margin-top: 0; }
+      .tool-head { display: block; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 20px, 1180px); padding-top: 18px; }
+      header { align-items: flex-start; flex-direction: column; margin-bottom: 20px; }
+      .header-link { width: 100%; text-align: center; }
+      .intro, .feature-card, .tool { border-radius: 22px; }
+      .tabs { grid-template-columns: 1fr; padding: 10px; }
+      .key { min-width: 33px; min-height: 38px; border-radius: 10px; font-size: 0.92rem; }
+      .key.wide { min-width: 64px; }
+      .key-row { gap: 5px; }
+      textarea { min-height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand" aria-label="SimpleChinese">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M7 11h10M9 16h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        <span>SimpleChinese</span>
+      </div>
+      <a class="header-link" href="#keyboard">중국어 자판 시작하기</a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="main-title">
+        <div class="panel intro">
+          <div class="eyebrow">Blue and White Chinese Keyboard</div>
+          <h1 id="main-title">중국어 입력을 가장 단순하게</h1>
+          <p>한어병음 입력과 성조 변환, 로마자 정리, 주음부호 입력, 오필자형 키 입력을 한 화면에서 처리하는 심플한 중국어 자판입니다. 대문자 변환, 복사, 모바일 입력까지 깔끔하게 지원합니다.</p>
+        </div>
+        <aside class="panel feature-card" aria-label="주요 기능">
+          <h2>지원 자판</h2>
+          <p>필요한 방식만 선택하고 입력하세요. 변환 결과는 즉시 복사할 수 있습니다.</p>
+          <div class="chips">
+            <span class="chip">한어병음</span>
+            <span class="chip">로마자 변환</span>
+            <span class="chip">주음부호</span>
+            <span class="chip">오필자형</span>
+            <span class="chip">성조 1234</span>
+          </div>
+        </aside>
+      </section>
+
+      <section id="keyboard" class="workspace">
+        <nav class="panel tabs" aria-label="자판 선택">
+          <button class="tab-button active" data-tool="pinyin" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17 10 5h4l6 12M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>한어병음<span class="tab-sub">성조 숫자 변환</span></span></button>
+          <button class="tab-button" data-tool="roman" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h10M5 17h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span>로마자 변환<span class="tab-sub">대문자와 정리</span></span></button>
+          <button class="tab-button" data-tool="bopomofo" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M7 5h10v5H7zM7 14h10M12 10v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>주음부호<span class="tab-sub">보포모포 입력</span></span></button>
+          <button class="tab-button" data-tool="wubi" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16M8 4v16M16 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span>오필자형<span class="tab-sub">Wubi 키 입력</span></span></button>
+        </nav>
+
+        <article class="panel tool">
+          <div class="tool-head">
+            <div>
+              <h2 id="tool-title">한어병음 입력/변환 자판</h2>
+              <p id="tool-desc" class="tool-desc">hao3, zhong1처럼 입력하면 hǎo 또는 hǎo3으로 바꿉니다. v는 ü로 변환할 수 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div>
+              <label for="source">입력</label>
+              <textarea id="source" placeholder="예: ni3 hao3, zhong1 guo2"></textarea>
+            </div>
+            <div>
+              <label for="result">결과</label>
+              <textarea id="result" readonly placeholder="변환 결과가 여기에 표시됩니다."></textarea>
+            </div>
+          </div>
+
+          <div class="option-row">
+            <label class="toggle"><input id="uppercase" type="checkbox" /> 대문자</label>
+            <label class="toggle"><input id="toneNumbers" type="checkbox" checked /> 1234성 성조 추가</label>
+            <label class="toggle"><input id="vToU" type="checkbox" checked /> v를 ü로 변환</label>
+          </div>
+
+          <div class="actions">
+            <button id="convert" class="btn" type="button">변환</button>
+            <button id="copy" class="btn secondary" type="button">복사</button>
+            <button id="clear" class="btn ghost" type="button">지우기</button>
+            <span id="status" class="status" aria-live="polite"></span>
+          </div>
+
+          <div class="keyboard" aria-label="화상 자판">
+            <div class="key-row" data-row="top"></div>
+            <div class="key-row" data-row="middle"></div>
+            <div class="key-row" data-row="bottom"></div>
+            <div class="key-row" data-row="extra"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>SimpleChinese는 빠른 입력과 복사를 위한 단순한 중국어 자판 도구입니다.</footer>
+  </div>
+
+  <script>
+    const tools = {
+      pinyin: {
+        title: '한어병음 입력/변환 자판',
+        desc: 'hao3, zhong1처럼 입력하면 hǎo 또는 hǎo3으로 바꿉니다. v는 ü로 변환할 수 있습니다.',
+        placeholder: '예: ni3 hao3, zhong1 guo2',
+        rows: [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['z','x','c','v','b','n','m'], ['1','2','3','4','5','space','back']],
+        convert: convertPinyin
+      },
+      roman: {
+        title: '로마자 변환 자판',
+        desc: '중국어 로마자 표기를 공백 기준으로 정리하고 선택 시 대문자로 변환합니다.',
+        placeholder: '예: zhong guo ren min',
+        rows: [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['z','x','c','v','b','n','m'], ['-','\'','space','back']],
+        convert: convertRoman
+      },
+      bopomofo: {
+        title: '주음부호 자판',
+        desc: '주음부호를 바로 입력하고 1, 2, 3, 4 성조 기호를 붙일 수 있습니다.',
+        placeholder: '예: ㄓㄨㄥ ㄍㄨㄛˊ',
+        rows: [['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ','ㄌ'], ['ㄍ','ㄎ','ㄏ','ㄐ','ㄑ','ㄒ'], ['ㄓ','ㄔ','ㄕ','ㄖ','ㄗ','ㄘ','ㄙ'], ['ㄚ','ㄛ','ㄜ','ㄝ','ㄞ','ㄟ','ㄠ','ㄡ'], ['ㄢ','ㄣ','ㄤ','ㄥ','ㄦ','ˉ','ˊ','ˇ','ˋ','space','back']],
+        convert: text => text
+      },
+      wubi: {
+        title: '오필자형 자판',
+        desc: '오필자형 입력에 쓰는 영문 키를 빠르게 입력하고 대문자 변환과 복사를 지원합니다.',
+        placeholder: '예: wubi key code',
+        rows: [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['z','x','c','v','b','n','m'], ['space','back']],
+        convert: convertRoman
+      }
+    };
+
+    const source = document.querySelector('#source');
+    const result = document.querySelector('#result');
+    const status = document.querySelector('#status');
+    const uppercase = document.querySelector('#uppercase');
+    const toneNumbers = document.querySelector('#toneNumbers');
+    const vToU = document.querySelector('#vToU');
+    let currentTool = 'pinyin';
+
+    function convertPinyin(text) {
+      const toneMap = {
+        a: ['ā','á','ǎ','à'], e: ['ē','é','ě','è'], i: ['ī','í','ǐ','ì'],
+        o: ['ō','ó','ǒ','ò'], u: ['ū','ú','ǔ','ù'], ü: ['ǖ','ǘ','ǚ','ǜ']
+      };
+      return text.replace(/([a-züv:]+)([1-5])/gi, (match, syllable, tone) => {
+        let base = syllable.toLowerCase().replace(/u:/g, 'ü');
+        if (vToU.checked) base = base.replace(/v/g, 'ü');
+        const toneIndex = Number(tone) - 1;
+        if (toneIndex < 0 || toneIndex > 3) return base;
+        const target = pickToneTarget(base);
+        if (!target) return base;
+        const marked = base.replace(target, toneMap[target][toneIndex]);
+        return toneNumbers.checked ? marked + tone : marked;
+      });
+    }
+
+    function pickToneTarget(syllable) {
+      if (syllable.includes('a')) return 'a';
+      if (syllable.includes('e')) return 'e';
+      if (syllable.includes('ou')) return 'o';
+      const vowels = ['o', 'i', 'u', 'ü'];
+      let found = '';
+      for (const vowel of vowels) if (syllable.includes(vowel)) found = vowel;
+      return found;
+    }
+
+    function convertRoman(text) {
+      const cleaned = text.trim().replace(/\s+/g, ' ');
+      return vToU.checked ? cleaned.replace(/v/g, 'ü').replace(/V/g, 'Ü') : cleaned;
+    }
+
+    function runConvert() {
+      const tool = tools[currentTool];
+      let value = tool.convert(source.value);
+      if (uppercase.checked) value = value.toLocaleUpperCase();
+      result.value = value;
+    }
+
+    function renderKeyboard() {
+      const rows = document.querySelectorAll('.key-row');
+      rows.forEach(row => row.innerHTML = '');
+      tools[currentTool].rows.forEach((keys, index) => {
+        const row = rows[index] || rows[rows.length - 1];
+        keys.forEach(key => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = key === 'space' || key === 'back' ? 'key wide' : 'key';
+          button.textContent = key === 'space' ? '공백' : key === 'back' ? '삭제' : key;
+          button.addEventListener('click', () => insertKey(key));
+          row.appendChild(button);
+        });
+      });
+    }
+
+    function insertKey(key) {
+      const start = source.selectionStart;
+      const end = source.selectionEnd;
+      if (key === 'back') {
+        if (start === end && start > 0) source.value = source.value.slice(0, start - 1) + source.value.slice(end);
+        else source.value = source.value.slice(0, start) + source.value.slice(end);
+        source.focus();
+        source.selectionStart = source.selectionEnd = Math.max(0, start - 1);
+      } else {
+        const value = key === 'space' ? ' ' : key;
+        source.value = source.value.slice(0, start) + value + source.value.slice(end);
+        source.focus();
+        source.selectionStart = source.selectionEnd = start + value.length;
+      }
+      runConvert();
+    }
+
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        currentTool = button.dataset.tool;
+        document.querySelectorAll('.tab-button').forEach(tab => tab.classList.toggle('active', tab === button));
+        document.querySelector('#tool-title').textContent = tools[currentTool].title;
+        document.querySelector('#tool-desc').textContent = tools[currentTool].desc;
+        source.placeholder = tools[currentTool].placeholder;
+        toneNumbers.parentElement.classList.toggle('hidden', currentTool !== 'pinyin' && currentTool !== 'bopomofo');
+        vToU.parentElement.classList.toggle('hidden', currentTool === 'bopomofo');
+        renderKeyboard();
+        runConvert();
+      });
+    });
+
+    document.querySelector('#convert').addEventListener('click', runConvert);
+    source.addEventListener('input', runConvert);
+    uppercase.addEventListener('change', runConvert);
+    toneNumbers.addEventListener('change', runConvert);
+    vToU.addEventListener('change', runConvert);
+    document.querySelector('#clear').addEventListener('click', () => { source.value = ''; result.value = ''; status.textContent = ''; source.focus(); });
+    document.querySelector('#copy').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(result.value || source.value);
+      status.textContent = '복사되었습니다';
+      setTimeout(() => status.textContent = '', 1600);
+    });
+
+    renderKeyboard();
+    runConvert();
+  </script>
+</body>
+</html>
