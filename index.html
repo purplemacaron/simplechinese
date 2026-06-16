@@ -146,8 +146,8 @@ function candidateList(){
   if(!buf)return [];
   const marked=markPinyin();
   const cs=candidates();
-  const raw=marked || buf;
-  if(hasTone()) return [raw,...cs];
+  if(hasTone()) return cs.length ? cs : [marked || (baseBuf() || buf)];
+  const raw=marked || (baseBuf() || buf);
   return [raw,...cs];
 }
 function render(){
@@ -192,8 +192,12 @@ function inputLetter(ch){
 function inputTone(n){
   if(mode==='pinyin'){
     if(buf){
-      // 숫자를 덮어쓰지 말고 현재 병음 뒤에 성조 입력
-      buf=buf.replace(/[1-5]+$/,'')+n;
+      const last=(buf[buf.length-1]||'').toLowerCase();
+      if('aeiouvü'.includes(last) && ['1','2','3','4','5'].includes(String(n))){
+        buf=buf.replace(/[1-5]+$/,'')+n;
+      }else{
+        buf+=String(n);
+      }
       sel=0;
       render();
       return;
