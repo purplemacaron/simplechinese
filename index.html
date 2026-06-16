@@ -143,13 +143,11 @@ function pyCandidates(){
 function wuCandidates(){const b=buf.toLowerCase();return b?(wubiDict[b]||[]):[]}
 function candidates(){if(mode==='pinyin')return pyCandidates();if(mode==='wubi')return wuCandidates();return[]}
 function candidateList(){
-const rawInputForNoConversion = pinyin;
-
   if(!buf)return [];
   const marked=markPinyin();
   const cs=candidates();
-  if(hasTone()) return cs.length ? cs : [marked || (baseBuf() || buf)];
-  const raw=marked || (baseBuf() || buf);
+  const raw=marked || buf;
+  if(hasTone()) return [raw,...cs];
   return [raw,...cs];
 }
 function render(){
