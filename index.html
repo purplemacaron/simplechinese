@@ -21,7 +21,7 @@ main{width:min(940px,100%);margin:0 auto;padding:14px 12px 32px}.output-box,.pan
 <header><div class="logo">Simple<span>Chinese</span></div></header>
 <main>
   <section class="output-box"><div class="output-bar"><span class="label">출력</span><div class="btns"><button class="btn" id="copyBtn">복사</button><button class="btn danger" id="clearBtn">지우기</button></div></div><div id="out"></div></section>
-  <div class="tabs"><button class="tab active" data-tab="pinyin">한어병음</button><button class="tab" data-tab="roman">로마자 자판</button><button class="tab" data-tab="bopomofo">주음부호</button><button class="tab" data-tab="wubi">오필자형</button></div>
+  <div class="tabs"><button class="tab active" data-tab="pinyin">한어병음</button><button class="tab" data-tab="bopomofo">주음부호</button><button class="tab" data-tab="wubi">오필자형</button></div>
   <section class="panel">
     <div class="panel-head"><span class="title" id="panelTitle">한어병음 한자 변환</span><span class="hint" id="panelHint">성조 1-5 · 방향키로 후보 이동 · Enter·Space 두 번 연속 → 줄바꿈·공백</span></div>
     <div class="compose" id="compose">입력: <span id="bufText"></span></div>
@@ -97,15 +97,22 @@ const toneMap={a:['ā','á','ǎ','à','a'],e:['ē','é','ě','è','e'],i:['ī','
 function norm(s){return s.toLowerCase().replace(/u:/g,'v').replace(/ü/g,'v').replace(/[^a-zv]/g,'')}
 function toneNum(){const m=buf.match(/[1-5]$/);return m?Number(m[0]):0}
 function baseBuf(){return norm(buf)}
-function markPinyin(){const tone=toneNum();let s=baseBuf();if(!s)return buf;if(!tone||tone===5)return s.replace(/v/g,'ü');let target='';if(s.includes('a'))target='a';else if(s.includes('e'))target='e';else if(s.includes('ou'))target='o';else{const m=s.match(/[iuv](?!.*[iuv])/);target=m?m[0]:''}if(!target)return s;const idx=s.lastIndexOf(target);return(s.slice(0,idx)+toneMap[target][tone-1]+s.slice(idx+1)).replace(/v/g,'ü')}
+function markPinyin(){const tone=toneNum();let s=baseBuf();if(!s)return '';if(!tone||tone===5)return s.replace(/v/g,'ü');let target='';if(s.includes('a'))target='a';else if(s.includes('e'))target='e';else if(s.includes('ou'))target='o';else{const m=s.match(/[iuv](?!.*[iuv])/);target=m?m[0]:''}if(!target)return s;const idx=s.lastIndexOf(target);return(s.slice(0,idx)+toneMap[target][tone-1]+s.slice(idx+1)).replace(/v/g,'ü')}
 function pyCandidates(){const b=baseBuf();return b?(dict[b]||[]):[]}
 function wuCandidates(){const b=buf.toLowerCase();return b?(wubiDict[b]||[]):[]}
-function candidates(){if(mode==='pinyin'||mode==='roman')return pyCandidates();if(mode==='wubi')return wuCandidates();return[]}
-function candidateList(){const cs=candidates();return cs.length?cs:[baseBuf()||buf]}
+function candidates(){if(mode==='pinyin')return pyCandidates();if(mode==='wubi')return wuCandidates();return[]}
+function candidateList(){
+  const marked=markPinyin();
+  const cs=candidates();
+  // 첫 번째 후보: 병음 그대로(성조기호 포함), 이후 한자 후보
+  const raw=marked||(baseBuf()||buf);
+  return[raw,...cs];
+}
 function render(){
   outEl.textContent=out;
-  const marked=(mode==='pinyin'||mode==='roman')&&buf?`  ${markPinyin()}`:'';
-  bufEl.textContent=buf+marked;
+  // 예비창: 성조기호 적용된 병음만 표시 (buf 원문 숫자 제거)
+  const marked=markPinyin();
+  bufEl.textContent=marked||(baseBuf()||buf)||'';
   composeEl.classList.toggle('show',!!buf);
   const list=buf&&mode!=='bopomofo'?candidateList().slice(0,18):[];
   candsEl.classList.toggle('show',list.length>0);
@@ -113,13 +120,13 @@ function render(){
   if(list.length){
     if(sel>=list.length)sel=list.length-1;
     if(sel<0)sel=0;
-    list.forEach((text,i)=>{const b=document.createElement('button');b.className='cand '+(i===sel?'sel':'');b.innerHTML='<small>'+(i+1)+'</small><span>'+text+'</span>';b.onclick=()=>commit(false,i);candsEl.appendChild(b)});
+    list.forEach((text,i)=>{const b=document.createElement('button');b.className='cand '+(i===sel?'sel':'');b.innerHTML='<small>'+(i===0?'―':i)+'</small><span>'+text+'</span>';b.onclick=()=>commit(false,i);candsEl.appendChild(b)});
   }
 }
 function add(s){out+=s;render()}
 function clearAll(){out='';buf='';sel=0;lastAction=null;render()}
 function backspace(){if(buf)buf=buf.slice(0,-1);else out=out.slice(0,-1);sel=0;lastAction=null;render()}
-function commit(addExtra,index){if(index===undefined)index=sel;if(buf){if(mode==='bopomofo'){out+=buf}else{const list=candidateList();out+=(list[index]||list[0]||buf)}buf='';sel=0}if(addExtra)out+=addExtra;render()}
+function commit(addExtra,index){if(index===undefined)index=sel;if(buf){if(mode==='bopomofo'){out+=buf}else{const list=candidateList();out+=(list[index]??list[0]??markPinyin()??buf)}buf='';sel=0}if(addExtra)out+=addExtra;render()}
 
 function smartSpace(){
   if(mode==='bopomofo'){add(' ');return}
@@ -137,11 +144,10 @@ function quickPick(n){if(buf&&mode!=='bopomofo'){commit(false,n-1);recordAction(
 function inputLetter(ch){
   if(mode==='bopomofo'){out+=bpPhysical[ch.toLowerCase()]||ch;render();return}
   if(mode==='wubi'){buf+=ch.toLowerCase();sel=0;render();return}
-  if(buf&&candidates().length&&/^[bcdfghjklmnpqrstvwxyz]$/i.test(ch)&&/[aeiouv][1-5]?$/i.test(buf)){commit(false)}
   buf+=ch.toLowerCase();sel=0;lastAction=null;render()
 }
 function inputTone(n){
-  if((mode==='pinyin'||mode==='roman')&&buf){buf=buf.replace(/[1-5]$/,'')+n;sel=0;render()}
+  if(mode==='pinyin'&&buf){buf=buf.replace(/[1-5]$/,'')+n;sel=0;render()}
   else if(mode==='bopomofo'){add({'1':'ˉ','2':'ˊ','3':'ˇ','4':'ˋ','5':'˙'}[n])}
   else add(String(n))
 }
