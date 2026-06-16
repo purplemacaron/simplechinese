@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SimpleChinese</title>
+<title>심플차이니즈</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f5f7fb;--panel:#fff;--line:#d8dee9;--line2:#b8c2d2;--text:#111827;--muted:#64748b;--soft:#eef3f8;--accent:#2563eb;--accent2:#1d4ed8;--danger:#dc2626;--key:#fff;--key2:#e9eef6;--cn:"Noto Sans SC","Microsoft YaHei",SimSun,serif;--ui:"Noto Sans KR",system-ui,sans-serif}
@@ -148,6 +148,30 @@ function candidateList(){
   const raw=marked || (baseBuf() || buf);
   return [raw,...cs];
 }
+
+function render(){
+  outEl.textContent = out;
+  bufEl.textContent = mode==='bopomofo' ? buf : markPinyin();
+  composeEl.classList.toggle('show', !!buf);
+  candsEl.innerHTML = '';
+  const list = candidateList();
+
+  if(!buf){
+    candsEl.classList.remove('show');
+    return;
+  }
+
+  candsEl.classList.add('show');
+  list.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'cand' + (i===sel ? ' sel' : '');
+    b.type = 'button';
+    b.innerHTML = `<span>${c}</span>` + (i===0 ? '<small>원문</small>' : `<small>${i+1}</small>`);
+    b.onclick = () => { commit(false, i); recordAction('click'); };
+    candsEl.appendChild(b);
+  });
+}
+
 function add(s){out+=s;render()}
 function clearAll(){out='';buf='';sel=0;lastAction=null;render()}
 function backspace(){if(buf)buf=buf.slice(0,-1);else out=out.slice(0,-1);sel=0;lastAction=null;render()}
