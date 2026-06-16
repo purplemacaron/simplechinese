@@ -12,8 +12,9 @@ header{height:52px;background:var(--panel);border-bottom:1px solid var(--line);d
 main{width:min(940px,100%);margin:0 auto;padding:14px 12px 32px}.output-box,.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.output-box{margin-bottom:12px}.output-bar{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--line)}.label{font-size:12px;font-weight:800;color:var(--muted)}.btns{display:flex;gap:6px}.btn{height:32px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--text);font:700 12px var(--ui);cursor:pointer}.btn:hover{border-color:var(--line2);background:var(--soft)}.btn.danger{color:var(--danger)}
 #out{min-height:96px;padding:14px 16px;font:28px/1.5 var(--cn);white-space:pre-wrap;word-break:break-word;letter-spacing:.02em}#out:empty:before{content:"입력 영역";font:13px var(--ui);color:#94a3b8;letter-spacing:0}.tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px 8px 0 0;overflow-x:auto}.tab{padding:12px 15px;border:0;border-bottom:2px solid transparent;background:#fff;color:var(--muted);font:800 13px var(--ui);white-space:nowrap;cursor:pointer}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}.panel{border-top:0;border-radius:0 0 8px 8px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:#fff}.title{font-weight:800;font-size:13px}.hint{font-size:11px;color:var(--muted)}
 .compose{display:none;padding:8px 12px;border-bottom:1px solid #bfdbfe;background:#eff6ff;color:var(--accent);font-weight:800;min-height:38px}.compose.show{display:block}.compose span{font-family:ui-monospace,Menlo,Consolas,monospace}.cands{display:none;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:#f8fafc}.cands.show{display:grid}.cand{min-height:40px;border:1px solid var(--line);border-radius:6px;background:#fff;font:22px var(--cn);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}.cand small{font:10px var(--ui);color:var(--muted)}.cand.sel{border-color:var(--accent);background:#eff6ff;color:var(--accent)}
+.kb-wrap{padding:12px 8px 10px;overflow-x:auto}.kb{display:flex;flex-direction:column;gap:6px;min-width:320px}.row{display:flex;justify-content:center;gap:5px}.key{height:42px;min-width:34px;flex:1;border:1px solid var(--line);border-radius:6px;background:var(--key);box-shadow:0 1px 2px rgba(15,23,42,.08);font:800 15px var(--ui);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}.key:active{background:#dbeafe}.key.fn{background:var(--key2);font-size:12px;color:#475569}.key.primary{background:var(--accent);border-color:var(--accent2);color:#fff}.key.space{flex:5}.key.wide{flex:1.6}.key.cn{font-family:var(--cn);font-size:20px}.info{padding:9px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);background:#f8fafc}
 .toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,45px);opacity:0;background:#111827;color:#fff;border-radius:999px;padding:8px 16px;font:800 12px var(--ui);transition:.18s;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:640px){header{height:48px}main{padding:10px 8px 24px}.tab{padding:11px 12px}#out{font-size:24px;min-height:86px;padding:12px}.cands{grid-template-columns:repeat(3,minmax(0,1fr))}.btn{height:31px;padding:0 10px}}
+@media(max-width:640px){header{height:48px}main{padding:10px 8px 24px}.tab{padding:11px 12px}.panel-head{align-items:flex-start;flex-direction:column}.hint{display:none}#out{font-size:24px;min-height:86px;padding:12px}.cands{grid-template-columns:repeat(3,minmax(0,1fr))}.kb-wrap{padding:10px 4px}.kb{min-width:0;gap:5px}.row{gap:4px}.key{height:39px;min-width:0;font-size:14px;padding:0 3px}.key.fn{font-size:11px}.btn{height:31px;padding:0 10px}}
 </style>
 </head>
 <body>
@@ -21,16 +22,20 @@ main{width:min(940px,100%);margin:0 auto;padding:14px 12px 32px}.output-box,.pan
 <main>
   <section class="output-box"><div class="output-bar"><span class="label">출력</span><div class="btns"><button class="btn" id="copyBtn">복사</button><button class="btn danger" id="clearBtn">지우기</button></div></div><div id="out"></div></section>
   <div class="tabs"><button class="tab active" data-tab="pinyin">한어병음</button><button class="tab" data-tab="roman">로마자 자판</button><button class="tab" data-tab="bopomofo">주음부호</button><button class="tab" data-tab="wubi">오필자형</button></div>
-  <section class="panel"><div class="panel-head"><span class="title" id="panelTitle">한어병음 한자 변환</span></div><div class="compose" id="compose">입력: <span id="bufText"></span></div><div class="cands" id="cands"></div></section>
-</main><div class="toast" id="toast">복사했습니다</div>
+  <section class="panel">
+    <div class="panel-head"><span class="title" id="panelTitle">한어병음 한자 변환</span><span class="hint" id="panelHint">성조 1-5 · 방향키로 후보 이동 · Enter·Space 두 번 연속 → 줄바꿈·공백</span></div>
+    <div class="compose" id="compose">입력: <span id="bufText"></span></div>
+    <div class="cands" id="cands"></div>
+    <div class="kb-wrap"><div class="kb" id="keyboard"></div></div>
+    <div class="info" id="info">Enter·Space: 버퍼 있으면 확정 / 연속 2번이면 줄바꿈·공백</div>
+  </section>
+</main>
+<div class="toast" id="toast">복사했습니다</div>
 <script>
-const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),composeEl=document.getElementById('compose'),candsEl=document.getElementById('cands'),panelTitle=document.getElementById('panelTitle');
+const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),composeEl=document.getElementById('compose'),candsEl=document.getElementById('cands'),kbEl=document.getElementById('keyboard'),panelTitle=document.getElementById('panelTitle'),panelHint=document.getElementById('panelHint'),infoEl=document.getElementById('info');
 let out='',buf='',mode='pinyin',sel=0;
-
-// ── 더블탭 감지용 ──────────────────────────────────────────────
-// lastAction: 'commit'|'space'|'newline'|null
 let lastAction=null,lastActionTime=0;
-const DOUBLE_MS=400; // 더블탭 인식 시간(ms)
+const DOUBLE_MS=400;
 function wasJust(action){return lastAction===action&&(Date.now()-lastActionTime)<DOUBLE_MS}
 function recordAction(action){lastAction=action;lastActionTime=Date.now()}
 
@@ -58,22 +63,22 @@ const dict={
  za:['杂','砸'],zai:['在','再','载','仔'],zan:['咱','赞','暂'],zang:['脏','藏'],zao:['早','造','遭'],ze:['则','责','泽'],zei:['贼'],zen:['怎'],zeng:['增','曾'],zha:['炸','扎','渣'],zhai:['摘','债','窄'],zhan:['站','战','展','占'],zhang:['张','长','章','掌'],zhao:['找','照','招','赵'],zhe:['这','者','着','折'],zhen:['真','镇','阵','针'],zheng:['正','整','政','争'],zhi:['只','之','知','直','制'],zhong:['中','种','重','众'],zhou:['周','州','走','洲'],zhu:['主','住','猪','竹','助'],zhua:['抓'],zhuai:['拽'],zhuan:['转','专','传'],zhuang:['装','状','庄'],zhui:['追','坠'],zhun:['准'],zhuo:['着','桌','捉'],zi:['子','字','自','资'],zong:['总','宗','纵'],zou:['走','奏'],zu:['组','足','族'],zuan:['钻'],zui:['最','嘴','罪'],zun:['尊'],zuo:['做','作','左','坐']
 };
 const extraDict={
- a:['锕','嗄','腌'],ai:['艾','癌','隘','蔼','皑','唉','嗳'],an:['俺','鞍','氨','庵','俺','胺','谙'],ang:['盎','肮'],ao:['凹','袄','懊','鳌','翱','拗'],
- ba:['坝','罢','芭','疤','靶','叭','扒'],bai:['柏','伯','佰','稗','掰'],ban:['伴','搬','斑','颁','扮','瓣'],bang:['绑','傍','磅','膀'],bao:['爆','薄','鲍','堡','胞','饱'],bei:['悲','碑','辈','倍','卑','蓓'],ben:['苯','贲','夯'],beng:['泵','绷','甭'],bi:['彼','碧','毕','壁','臂','弊','逼','辟'],bian:['辨','辩','扁','匾','鞭','贬'],biao:['彪','镖','婊'],bie:['憋','鳖'],bin:['彬','斌','鬓'],bing:['饼','丙','秉','禀'],bo:['玻','柏','勃','薄','泊','脖','卜'],bu:['簿','怖','捕','哺','卜'],
- ca:['嚓'],cai:['彩','材','裁','蔡','踩'],can:['惨','蚕','惭','掺'],cang:['苍','沧','舱'],cao:['槽','曹','糙'],ce:['策','厕'],ceng:['蹭'],cha:['察','刹','茬','岔','诧'],chai:['差','钗'],chan:['掺','馋','铲','蝉','颤'],chang:['尝','偿','昌','肠','畅'],chao:['吵','抄','巢','钞'],che:['扯','澈'],chen:['臣','辰','趁','衬','郴'],cheng:['诚','橙','乘','惩','呈'],chi:['池','痴','驰','耻','齿'],chong:['宠','崇','涌'],chou:['仇','筹','丑','酬'],chu:['触','厨','础','储','畜'],chuan:['串','喘','椽'],chuang:['闯','疮'],chun:['醇','蠢','椿'],ci:['辞','瓷','磁','刺','伺'],cong:['匆','葱'],cu:['醋','卒'],cui:['崔','摧'],cuo:['挫','撮'],
- da:['搭','答','瘩','塔'],dai:['袋','贷','逮','歹'],dan:['胆','丹','旦','诞','耽'],dang:['荡','裆'],dao:['岛','祷','盗','稻'],de:['地','底'],deng:['瞪','凳','蹬'],di:['递','帝','敌','抵','滴','迪'],dian:['殿','垫','颠','淀'],diao:['雕','吊'],ding:['盯','鼎','钉'],dong:['洞','冻','董','栋'],dou:['抖','兜','陡'],du:['杜','堵','肚','渡','督'],duan:['锻','缎'],dui:['兑','怼'],dun:['敦','墩','蹲'],duo:['堕','舵','跺'],
- e:['鄂','遏','蛾','峨','扼'],en:['摁'],er:['尔','饵','贰','洱'],fa:['伐','阀','乏'],fan:['翻','番','犯','返','繁','泛'],fang:['芳','访','仿','坊'],fei:['废','肺','匪','菲'],fen:['奋','愤','纷','坟'],feng:['凤','奉','锋','疯'],fu:['附','富','负','妇','扶','符','腐','赴'],
- ga:['尬','嘎'],gai:['钙','概','丐'],gan:['甘','肝','杆','赣'],gang:['岗','杠'],gao:['稿','糕','膏'],ge:['革','隔','阁','割','葛'],gen:['亘','艮'],geng:['庚','梗'],gong:['攻','供','恭','贡','龚'],gou:['购','构','钩'],gu:['骨','顾','鼓','孤','姑'],gua:['卦','寡'],guai:['拐'],guan:['馆','惯','灌','冠'],guang:['逛'],gui:['桂','柜','跪','轨'],guo:['郭','裹','锅'],
- ha:['蛤'],hai:['嗨','骸'],han:['汗','旱','翰','憾','涵'],hang:['巷'],hao:['豪','耗','郝','皓'],he:['贺','核','赫','盒','荷'],hen:['痕'],hong:['虹','轰','哄'],hou:['猴','喉','侯'],hu:['呼','乎','互','壶','狐'],hua:['画','划','滑','哗'],huan:['缓','幻','患','焕'],huang:['荒','晃','煌'],hui:['汇','惠','慧','毁','挥'],hun:['昏','浑'],huo:['获','惑','祸','霍'],
- ji:['集','计','急','季','技','基','际','济','继','纪'],jia:['佳','架','夹','嫁','驾','嘉'],jian:['检','减','坚','健','肩','兼','荐'],jiang:['奖','姜','蒋','疆','匠'],jiao:['较','焦','骄','娇','胶'],jie:['结','借','街','杰','洁','截'],jin:['尽','仅','禁','锦','筋'],jing:['景','境','警','井','净','镜'],jiu:['旧','究','纠','舅'],ju:['剧','据','聚','拒','橘'],juan:['娟','倦','绢'],jue:['掘','爵','倔'],jun:['俊','菌','骏'],
- ka:['咔'],kai:['慨','楷'],kan:['刊','堪','坎'],kang:['慷'],kao:['烤','拷'],ke:['克','颗','壳','咳','柯'],ken:['恳'],keng:['铿'],kong:['控','恐'],kou:['寇'],ku:['酷','枯','裤'],kua:['垮'],kuai:['筷','会'],kuan:['髋'],kuang:['框','旷'],kui:['魁','葵'],kun:['坤'],kuo:['括'],
- la:['腊','蜡'],lai:['莱'],lan:['览','栏','篮'],lang:['狼','廊'],lao:['烙','捞'],le:['勒'],lei:['泪','垒'],li:['历','礼','丽','离','例','黎','璃','粒'],lian:['链','莲','怜','炼','恋'],liang:['粮','凉','梁','辆'],liao:['廖','疗','撩'],lie:['裂','猎'],lin:['邻','磷','麟'],ling:['另','铃','岭','陵'],liu:['柳','瘤','溜'],long:['笼','聋','拢'],lu:['露','鹿','炉','卢'],lv:['驴','吕','履'],lun:['伦','仑'],luo:['络','螺','骆'],
- ma:['骂','码','玛','蚂','抹'],mai:['埋','脉'],man:['蛮','漫','瞒'],mang:['盲'],mao:['帽','貌','贸','矛'],mei:['梅','媒','煤','眉','魅'],men:['闷','扪'],meng:['盟','萌','孟'],mi:['秘','蜜','觅'],mian:['眠','绵','勉'],miao:['描','庙'],min:['闽','皿'],ming:['鸣','铭'],mo:['魔','磨','摸','膜','墨'],mu:['牧','穆','墓'],
- na:['纳','娜'],nan:['楠','喃'],nao:['恼','挠'],nei:['馁'],ni:['泥','拟','逆','倪'],nian:['粘','捻'],nie:['涅','孽'],ning:['拧','柠'],niu:['扭','钮'],nu:['奴'],nuo:['糯'],
- pa:['趴','扒'],pai:['拍','迫'],pan:['潘','攀'],pang:['庞','乓'],pao:['抛','袍'],pei:['佩','沛','赔'],peng:['棚','膨','彭'],pi:['脾','疲','屁','譬'],pian:['偏','翩'],piao:['飘','朴'],pin:['聘','频'],ping:['凭','萍','屏'],po:['迫','魄'],pu:['扑','谱','瀑'],
- qi:['奇','齐','旗','企','启','妻','棋'],qian:['牵','潜','欠','迁','谦'],qiang:['抢','腔','呛'],qiao:['悄','翘','瞧'],qie:['茄','窃'],qin:['勤','侵','寝'],qing:['轻','倾','庆','晴'],qiu:['丘','囚'],qu:['趋','渠','趣'],quan:['泉','拳','劝'],que:['雀','瘸'],qun:['裙'],
- ran:['燃','冉'],rang:['壤'],rao:['饶'],ren:['忍','刃','壬'],rong:['蓉','绒','冗'],rou:['揉'],ru:['儒','辱'],rui:['蕊'],ruo:['偌'],
- san:['叁','毯'],sao:['骚'],sha:['纱','砂','煞'],shan:['扇','陕','杉','删'],shang:['赏','裳'],shao:['稍','勺','哨'],she:['射','摄','舌'],shen:['沈','审','伸','慎'],sheng:['盛','圣','剩','绳'],shi:['式','实','世','史','识','始','士','示','石','诗'],shou:['守','寿','兽','售'],shu:['术','属','鼠','舒','叔','殊'],shuang:['霜'],shui:['税'],shuo:['朔'],si:['丝','寺','似','私','斯'],song:['诵','颂'],su:['俗','肃','塑'],sui:['穗'],sun:['笋'],suo:['缩','梭'],
+ a:['锕','嗄','腌'],ai:['艾','癌','隘','蔼','皑','唉'],an:['俺','鞍','氨','庵','胺'],ang:['盎','肮'],ao:['凹','袄','懊','鳌','翱'],
+ ba:['坝','罢','芭','疤','靶'],bai:['柏','伯','佰','稗'],ban:['伴','搬','斑','颁','扮','瓣'],bang:['绑','傍','磅','膀'],bao:['爆','薄','鲍','堡','胞','饱'],bei:['悲','碑','辈','倍','卑'],ben:['苯','夯'],bi:['彼','碧','毕','壁','臂','弊','逼'],bian:['辨','辩','扁','匾','鞭','贬'],biao:['彪','镖'],bin:['彬','斌','鬓'],bing:['饼','丙','秉'],bo:['玻','勃','薄','泊','脖'],bu:['簿','怖','捕','哺'],
+ ca:['嚓'],cai:['彩','材','裁','踩'],can:['惨','蚕','惭'],cang:['苍','沧','舱'],cao:['槽','曹','糙'],ce:['策','厕'],cha:['察','刹','茬','岔'],chai:['差','钗'],chan:['馋','铲','蝉','颤'],chang:['尝','偿','昌','肠','畅'],chao:['吵','抄','巢'],che:['扯','澈'],chen:['臣','辰','趁','衬'],cheng:['诚','橙','乘','惩','呈'],chi:['池','痴','驰','耻','齿'],chong:['宠','崇'],chou:['仇','筹','丑'],chu:['触','厨','础','储'],chuan:['串','喘'],chuang:['闯','疮'],chun:['醇','蠢'],ci:['辞','瓷','磁','刺'],cong:['匆','葱'],cu:['醋'],cui:['崔','摧'],cuo:['挫'],
+ da:['搭','瘩'],dai:['袋','贷','逮','歹'],dan:['胆','丹','旦','诞'],dang:['荡'],dao:['岛','祷','盗','稻'],deng:['瞪','凳'],di:['递','帝','敌','抵','滴','迪'],dian:['殿','垫','颠','淀'],diao:['雕','吊'],ding:['盯','鼎','钉'],dong:['洞','冻','董','栋'],dou:['抖','兜','陡'],du:['杜','堵','肚','渡'],duan:['锻','缎'],dui:['兑'],dun:['敦','墩','蹲'],duo:['堕','舵'],
+ e:['鄂','遏','蛾','峨','扼'],er:['尔','饵','贰'],fa:['伐','阀','乏'],fan:['翻','番','犯','返','繁','泛'],fang:['芳','访','仿','坊'],fei:['废','肺','匪','菲'],fen:['奋','愤','纷','坟'],feng:['凤','奉','锋','疯'],fu:['附','富','负','妇','扶','符','腐','赴'],
+ ga:['尬','嘎'],gai:['钙','概'],gan:['甘','肝','杆'],gang:['岗','杠'],gao:['稿','糕','膏'],ge:['革','隔','阁','割','葛'],geng:['庚','梗'],gong:['攻','供','恭','贡'],gou:['购','构','钩'],gu:['骨','顾','鼓','孤','姑'],gua:['卦','寡'],guan:['馆','惯','灌','冠'],gui:['桂','柜','跪','轨'],guo:['郭','裹'],
+ ha:['蛤'],hai:['嗨','骸'],han:['汗','旱','翰','憾','涵'],hao:['豪','耗','郝'],he:['贺','核','赫','盒','荷'],hen:['痕'],hong:['虹','轰','哄'],hou:['猴','喉','侯'],hu:['呼','乎','互','壶','狐'],hua:['画','划','滑'],huan:['缓','幻','患','焕'],huang:['荒','晃','煌'],hui:['汇','惠','慧','毁','挥'],hun:['昏','浑'],huo:['获','惑','祸'],
+ ji:['集','计','急','季','技','基','际','济','继','纪'],jia:['佳','架','夹','嫁','驾'],jian:['检','减','坚','健','肩','兼','荐'],jiang:['奖','姜','蒋','疆','匠'],jiao:['较','焦','骄','娇','胶'],jie:['结','借','街','杰','洁','截'],jin:['尽','仅','禁','锦','筋'],jing:['景','境','警','井','净','镜'],jiu:['旧','究','纠','舅'],ju:['剧','据','聚','拒','橘'],juan:['娟','倦','绢'],jue:['掘','爵','倔'],jun:['俊','菌','骏'],
+ ka:['咔'],kai:['慨','楷'],kan:['刊','堪','坎'],kang:['慷'],kao:['烤','拷'],ke:['克','颗','壳','咳','柯'],ken:['恳'],kong:['控','恐'],ku:['酷','枯','裤'],kua:['垮'],kuai:['筷'],kuan:['髋'],kuang:['框','旷'],kui:['魁','葵'],kun:['坤'],kuo:['括'],
+ la:['腊','蜡'],lan:['览','栏','篮'],lang:['狼','廊'],lao:['烙','捞'],lei:['泪','垒'],li:['历','礼','丽','离','例','黎','璃','粒'],lian:['链','莲','怜','炼','恋'],liang:['粮','凉','梁','辆'],liao:['廖','疗'],lie:['裂','猎'],lin:['邻','磷','麟'],ling:['另','铃','岭','陵'],liu:['柳','瘤','溜'],long:['笼','聋','拢'],lu:['露','鹿','炉','卢'],lv:['驴','吕','履'],lun:['伦','仑'],luo:['络','螺','骆'],
+ ma:['骂','码','玛','蚂'],mai:['埋','脉'],man:['蛮','漫','瞒'],mang:['盲'],mao:['帽','貌','贸','矛'],mei:['梅','媒','煤','眉','魅'],men:['闷'],meng:['盟','萌','孟'],mi:['秘','蜜','觅'],mian:['眠','绵','勉'],miao:['描','庙'],min:['闽','皿'],ming:['鸣','铭'],mo:['魔','磨','摸','膜','墨'],mu:['牧','穆','墓'],
+ na:['纳','娜'],nan:['楠','喃'],nao:['恼','挠'],ni:['泥','拟','逆','倪'],nian:['粘','捻'],nie:['涅','孽'],ning:['拧','柠'],niu:['扭','钮'],nu:['奴'],nuo:['糯'],
+ pa:['趴'],pai:['拍','迫'],pan:['潘','攀'],pang:['庞'],pao:['抛','袍'],pei:['佩','沛','赔'],peng:['棚','膨','彭'],pi:['脾','疲','屁'],pian:['偏','翩'],piao:['飘'],pin:['聘','频'],ping:['凭','萍','屏'],po:['迫','魄'],pu:['扑','谱','瀑'],
+ qi:['奇','齐','旗','企','启','妻','棋'],qian:['牵','潜','欠','迁','谦'],qiang:['抢','腔','呛'],qiao:['悄','翘','瞧'],qie:['茄','窃'],qin:['勤','侵','寝'],qing:['轻','倾','庆','晴'],qiu:['丘','囚'],qu:['趋','渠','趣'],quan:['泉','拳','劝'],que:['雀'],qun:['裙'],
+ ran:['燃','冉'],rang:['壤'],rao:['饶'],ren:['忍','刃'],rong:['蓉','绒'],rou:['揉'],ru:['儒','辱'],rui:['蕊'],ruo:['偌'],
+ san:['叁'],sao:['骚'],sha:['纱','砂','煞'],shan:['扇','陕','杉','删'],shang:['赏'],shao:['稍','勺','哨'],she:['射','摄','舌'],shen:['沈','审','伸','慎'],sheng:['盛','圣','剩','绳'],shi:['式','实','世','史','识','始','士','示','石','诗'],shou:['守','寿','兽','售'],shu:['术','属','鼠','舒','叔','殊'],shui:['税'],si:['丝','寺','似','私','斯'],song:['诵','颂'],su:['俗','肃','塑'],sun:['笋'],suo:['缩','梭'],
  ta:['踏','塌'],tan:['碳','贪','摊'],tang:['躺','烫','塘'],tao:['逃','涛','淘'],ti:['梯','踢','涕'],tian:['填','添'],tiao:['挑','眺'],ting:['挺','亭','廷'],tong:['统','铜','筒'],tou:['透','偷'],tu:['兔','徒','涂'],tui:['腿'],tuo:['妥','驼','拓'],
  wa:['娃','蛙'],wan:['湾','丸','腕','弯'],wang:['往','旺','亡'],wei:['伟','卫','围','维','味','尾'],wen:['稳','纹','吻'],wo:['窝','沃'],wu:['武','务','屋','舞','乌','误'],
  xi:['息','席','希','夕','戏','吸','析'],xia:['侠','峡','狭'],xian:['鲜','闲','陷','险','仙'],xiang:['相','象','项','响','乡'],xiao:['晓','效','削','肖','萧'],xie:['协','斜','携','械'],xin:['欣','芯','薪'],xing:['形','醒','幸','型'],xiu:['袖','绣'],xu:['虚','序','旭'],xuan:['旋','悬','轩'],xue:['穴','薛'],xun:['巡','旬','迅'],
@@ -88,55 +93,50 @@ const bpPhysical={b:'ㄅ',p:'ㄆ',m:'ㄇ',f:'ㄈ',d:'ㄉ',t:'ㄊ',n:'ㄋ',l:'ㄌ
 const wubiRows=[[['q','金'],['w','人'],['e','月'],['r','白'],['t','禾'],['y','言'],['u','立'],['i','水'],['o','火'],['p','之']],[['a','工'],['s','木'],['d','大'],['f','土'],['g','王'],['h','目'],['j','日'],['k','口'],['l','田']],[['z','纟'],['x','弓'],['c','又'],['v','女'],['b','子'],['n','心'],['m','山']]];
 const wubiDict={w:['人','你','他','个'],q:['金','钱','铁'],g:['王','五','一'],f:['地','土','二'],s:['木','林','本'],k:['口','中','品'],l:['田','国','回'],i:['水','没','海'],o:['火','炎'],p:['之','这'],n:['心','已','民'],m:['山','同','见'],wg:['全','会'],wq:['你','低'],ww:['从','众'],kg:['中'],lg:['国'],ii:['水'],ss:['林']};
 const toneMap={a:['ā','á','ǎ','à','a'],e:['ē','é','ě','è','e'],i:['ī','í','ǐ','ì','i'],o:['ō','ó','ǒ','ò','o'],u:['ū','ú','ǔ','ù','u'],v:['ǖ','ǘ','ǚ','ǜ','ü']};
+
 function norm(s){return s.toLowerCase().replace(/u:/g,'v').replace(/ü/g,'v').replace(/[^a-zv]/g,'')}
 function toneNum(){const m=buf.match(/[1-5]$/);return m?Number(m[0]):0}
 function baseBuf(){return norm(buf)}
-function markPinyin(raw){const tone=toneNum();let s=baseBuf();if(!s)return raw;if(!tone||tone===5)return s.replace(/v/g,'ü');let target='';if(s.includes('a'))target='a';else if(s.includes('e'))target='e';else if(s.includes('ou'))target='o';else{const m=s.match(/[iuv](?!.*[iuv])/);target=m?m[0]:''}if(!target)return s;const idx=s.lastIndexOf(target);return (s.slice(0,idx)+toneMap[target][tone-1]+s.slice(idx+1)).replace(/v/g,'ü')}
+function markPinyin(){const tone=toneNum();let s=baseBuf();if(!s)return buf;if(!tone||tone===5)return s.replace(/v/g,'ü');let target='';if(s.includes('a'))target='a';else if(s.includes('e'))target='e';else if(s.includes('ou'))target='o';else{const m=s.match(/[iuv](?!.*[iuv])/);target=m?m[0]:''}if(!target)return s;const idx=s.lastIndexOf(target);return(s.slice(0,idx)+toneMap[target][tone-1]+s.slice(idx+1)).replace(/v/g,'ü')}
 function pyCandidates(){const b=baseBuf();return b?(dict[b]||[]):[]}
 function wuCandidates(){const b=buf.toLowerCase();return b?(wubiDict[b]||[]):[]}
 function candidates(){if(mode==='pinyin'||mode==='roman')return pyCandidates();if(mode==='wubi')return wuCandidates();return[]}
 function candidateList(){const cs=candidates();return cs.length?cs:[baseBuf()||buf]}
-function render(){outEl.textContent=out;const marked=(mode==='pinyin'||mode==='roman')&&toneNum()?`  ${markPinyin(buf)}`:'';bufEl.textContent=buf+marked;composeEl.classList.toggle('show',!!buf);const list=buf&&mode!=='bopomofo'?candidateList().slice(0,18):[];candsEl.classList.toggle('show',list.length>0);candsEl.innerHTML='';if(list.length){if(sel>=list.length)sel=list.length-1;if(sel<0)sel=0;list.forEach((text,i)=>{const b=document.createElement('button');b.className='cand '+(i===sel?'sel':'');b.innerHTML='<small>'+(i+1)+'</small><span>'+text+'</span>';b.onclick=()=>commit(false,i);candsEl.appendChild(b)})}}
-function add(s){out+=s;render()}function clearAll(){out='';buf='';sel=0;lastAction=null;render()}function backspace(){if(buf)buf=buf.slice(0,-1);else out=out.slice(0,-1);sel=0;lastAction=null;render()}
-function commit(addExtra=false,index=sel){if(buf){if(mode==='bopomofo'){out+=buf}else{const list=candidateList();out+=(list[index]||list[0]||buf)}buf='';sel=0}if(addExtra)out+=addExtra;render()}
+function render(){
+  outEl.textContent=out;
+  const marked=(mode==='pinyin'||mode==='roman')&&buf?`  ${markPinyin()}`:'';
+  bufEl.textContent=buf+marked;
+  composeEl.classList.toggle('show',!!buf);
+  const list=buf&&mode!=='bopomofo'?candidateList().slice(0,18):[];
+  candsEl.classList.toggle('show',list.length>0);
+  candsEl.innerHTML='';
+  if(list.length){
+    if(sel>=list.length)sel=list.length-1;
+    if(sel<0)sel=0;
+    list.forEach((text,i)=>{const b=document.createElement('button');b.className='cand '+(i===sel?'sel':'');b.innerHTML='<small>'+(i+1)+'</small><span>'+text+'</span>';b.onclick=()=>commit(false,i);candsEl.appendChild(b)});
+  }
+}
+function add(s){out+=s;render()}
+function clearAll(){out='';buf='';sel=0;lastAction=null;render()}
+function backspace(){if(buf)buf=buf.slice(0,-1);else out=out.slice(0,-1);sel=0;lastAction=null;render()}
+function commit(addExtra,index){if(index===undefined)index=sel;if(buf){if(mode==='bopomofo'){out+=buf}else{const list=candidateList();out+=(list[index]||list[0]||buf)}buf='';sel=0}if(addExtra)out+=addExtra;render()}
 
-// ── 스마트 Space: 1번=확정, 연속2번=공백 ──────────────────
 function smartSpace(){
   if(mode==='bopomofo'){add(' ');return}
-  if(buf){
-    commit(false);
-    recordAction('commit-space');
-  } else if(wasJust('commit-space')){
-    // 직전에 Space로 확정했으면 → 공백 추가
-    out+=' ';render();
-    recordAction('space');
-  } else {
-    out+=' ';render();
-    recordAction('space');
-  }
+  if(buf){commit(false);recordAction('commit-space')}
+  else if(wasJust('commit-space')){out+=' ';render();recordAction('space')}
+  else{out+=' ';render();recordAction('space')}
 }
-
-// ── 스마트 Enter: 1번=확정, 연속2번=줄바꿈 ──────────────────
 function smartEnter(){
   if(mode==='bopomofo'){add('\n');return}
-  if(buf){
-    commit(false);
-    recordAction('commit-enter');
-  } else if(wasJust('commit-enter')){
-    // 직전에 Enter로 확정했으면 → 줄바꿈
-    out+='\n';render();
-    recordAction('newline');
-  } else {
-    out+='\n';render();
-    recordAction('newline');
-  }
+  if(buf){commit(false);recordAction('commit-enter')}
+  else if(wasJust('commit-enter')){out+='\n';render();recordAction('newline')}
+  else{out+='\n';render();recordAction('newline')}
 }
-
 function quickPick(n){if(buf&&mode!=='bopomofo'){commit(false,n-1);recordAction('commit-num');return true}return false}
 function inputLetter(ch){
   if(mode==='bopomofo'){out+=bpPhysical[ch.toLowerCase()]||ch;render();return}
   if(mode==='wubi'){buf+=ch.toLowerCase();sel=0;render();return}
-  // 한어병음: 현재 버퍼에 모음이 있고 새 자음이 오면 자동확정
   if(buf&&candidates().length&&/^[bcdfghjklmnpqrstvwxyz]$/i.test(ch)&&/[aeiouv][1-5]?$/i.test(buf)){commit(false)}
   buf+=ch.toLowerCase();sel=0;lastAction=null;render()
 }
@@ -150,18 +150,55 @@ function otherChar(ch){if(buf)commit(false);add(ch)}
 function copyOut(){if(!out)return;navigator.clipboard.writeText(out).then(showToast).catch(()=>{const t=document.createElement('textarea');t.value=out;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showToast()})}
 function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400)}
 
+function mkKey(text,cls,fn){const b=document.createElement('button');b.className='key '+cls;b.textContent=text;b.onclick=fn;return b}
+function buildKeyboard(){
+  kbEl.innerHTML='';
+  if(mode==='bopomofo'){
+    bpRows.forEach(r=>{const row=document.createElement('div');row.className='row';r.forEach(([c])=>row.appendChild(mkKey(c,'cn',()=>add(c))));kbEl.appendChild(row)});
+    addBottomRow(['⌫','fn wide',backspace],['Space','fn space',()=>add(' ')],['Enter','primary wide',()=>add('\n')]);
+    return;
+  }
+  if(mode==='wubi'){
+    wubiRows.forEach((r,idx)=>{
+      const row=document.createElement('div');row.className='row';
+      if(idx===2)row.appendChild(mkKey('⌫','fn wide',backspace));
+      r.forEach(([c,root])=>{const b=document.createElement('button');b.className='key';b.innerHTML='<span style="font-size:15px">'+c+'</span><span style="font:600 9px var(--ui);color:#94a3b8;display:block;margin-top:1px">'+root+'</span>';b.onclick=()=>inputLetter(c);row.appendChild(b)});
+      if(idx===2)row.appendChild(mkKey('↵','primary wide',smartEnter));
+      kbEl.appendChild(row);
+    });
+    addBottomRow(['Space','fn space',smartSpace],['↵','primary wide',smartEnter],['←','fn',()=>moveSel(-1)],['→','fn',()=>moveSel(1)]);
+    return;
+  }
+  // 한어병음 / 로마자
+  letterRows.forEach((r,idx)=>{
+    const row=document.createElement('div');row.className='row';
+    if(idx===2)row.appendChild(mkKey('⌫','fn wide',backspace));
+    r.forEach(k=>row.appendChild(mkKey(k==='v'?'ü':k,'',()=>inputLetter(k))));
+    if(idx===2)row.appendChild(mkKey('↵','primary wide',smartEnter));
+    kbEl.appendChild(row);
+  });
+  const nums=document.createElement('div');nums.className='row';
+  for(let i=1;i<=5;i++)nums.appendChild(mkKey(String(i),'fn',()=>inputTone(i)));
+  kbEl.appendChild(nums);
+  addBottomRow(['Space','fn space',smartSpace],['↵','primary wide',smartEnter],['←','fn',()=>moveSel(-1)],['→','fn',()=>moveSel(1)],['，','fn',()=>otherChar('，')],['。','fn',()=>otherChar('。')]);
+}
+function addBottomRow(...items){
+  const row=document.createElement('div');row.className='row';
+  items.forEach(([t,cls,fn])=>row.appendChild(mkKey(t,cls,fn)));
+  kbEl.appendChild(row);
+}
 function setMode(next){
   mode=next;buf='';sel=0;lastAction=null;
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===mode));
   const names={pinyin:'한어병음 한자 변환',roman:'로마자 자판',bopomofo:'주음부호 자판',wubi:'오필자형 자판'};
   panelTitle.textContent=names[mode];
-  render();
+  panelHint.textContent=mode==='bopomofo'?'화면 키 또는 실제 키보드로 입력':'성조 1-5 · 방향키로 후보 이동 · Enter·Space 두 번 → 줄바꿈·공백';
+  infoEl.textContent=mode==='bopomofo'?'Space는 공백, Enter는 줄바꿈입니다.':'Enter·Space: 버퍼 있으면 확정 / 연속 2번이면 줄바꿈·공백';
+  buildKeyboard();render();
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>setMode(t.dataset.tab));
 document.getElementById('copyBtn').onclick=copyOut;
 document.getElementById('clearBtn').onclick=clearAll;
-
-// ── 실제 키보드 단축키 ──────────────────────────────────────
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.key==='Backspace'){e.preventDefault();backspace();return}
@@ -174,8 +211,7 @@ document.addEventListener('keydown',e=>{
   if(/^[a-zA-Z]$/.test(e.key)){e.preventDefault();inputLetter(e.key);return}
   if(e.key.length===1){e.preventDefault();otherChar(e.key)}
 });
-
-render();
+buildKeyboard();render();
 </script>
 </body>
 </html>
