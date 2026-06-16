@@ -152,7 +152,7 @@ function candidateList(){
 }
 function render(){
   outEl.textContent=out;
-  bufEl.textContent=buf ? (mode==='pinyin' ? markPinyin() : buf) : '';
+  bufEl.textContent=buf ? (mode==='pinyin' ? markPinyin() : buf) : '');
   composeEl.classList.toggle('show', !!buf);
   candsEl.innerHTML='';
   const list=candidateList();
