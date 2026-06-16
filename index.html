@@ -33,7 +33,7 @@ main{width:min(940px,100%);margin:0 auto;padding:14px 12px 32px}.output-box,.pan
 </main>
 <div class="toast" id="toast">복사했습니다</div>
 <script>
-const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),composeEl=null,candsEl=document.getElementById('cands'),kbEl=document.getElementById('keyboard'),panelTitle=document.getElementById('panelTitle'),panelHint=document.getElementById('panelHint'),infoEl=document.getElementById('info');
+const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),composeEl={classList:{toggle(){}}},candsEl=document.getElementById('cands'),kbEl=document.getElementById('keyboard'),panelTitle=document.getElementById('panelTitle'),panelHint=document.getElementById('panelHint'),infoEl=document.getElementById('info');
 let out='',buf='',mode='pinyin',sel=0;
 let lastAction=null,lastActionTime=0;
 const DOUBLE_MS=400;
