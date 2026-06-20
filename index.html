@@ -128,10 +128,6 @@ function markPinyin(){
 function pyCandidates(){
   const b=baseBuf();
   if(!b)return [];
-  const t=toneNum();
-  if(t){
-    return [];
-  }
   return dict[b] ? [...dict[b]] : [];
 }
 function wuCandidates(){const b=buf.toLowerCase();return b?(wubiDict[b]||[]):[]}
