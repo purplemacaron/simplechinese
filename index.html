@@ -28,12 +28,11 @@ main{width:min(940px,100%);margin:0 auto;padding:14px 12px 32px}.output-box,.pan
     <div class="compose" id="bufText">입력:</div>
     <div class="cands" id="cands"></div>
     <div class="kb-wrap"><div class="kb" id="keyboard"></div></div>
-    <div class="info" id="info">Enter·Space: 버퍼 있으면 확정 / 연속 2번이면 줄바꿈·공백 | Shift: 대문자 직접 입력</div>
   </section>
 </main>
 <div class="toast" id="toast">복사했습니다</div>
 <script>
-const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),candsEl=document.getElementById('cands'),kbEl=document.getElementById('keyboard'),panelTitle=document.getElementById('panelTitle'),panelHint=document.getElementById('panelHint'),infoEl=document.getElementById('info');
+const outEl=document.getElementById('out'),bufEl=document.getElementById('bufText'),candsEl=document.getElementById('cands'),kbEl=document.getElementById('keyboard'),panelTitle=document.getElementById('panelTitle'),panelHint=document.getElementById('panelHint');
 let out='',buf='',mode='pinyin',sel=0;
 let lastAction=null,lastActionTime=0;
 // Shift 상태: false=소문자, true=대문자(shift 한 번), 'lock'=Caps Lock
@@ -345,7 +344,6 @@ function setMode(next){
   const names={pinyin:'한어병음 한자 변환',bopomofo:'주음부호 자판',wubi:'오필자형 자판'};
   panelTitle.textContent=names[mode];
   panelHint.textContent=mode==='bopomofo'?'화면 키 또는 실제 키보드로 입력':'성조 1-5 · 방향키로 후보 이동 · Shift: 대문자 직접 입력 · Enter·Space 두 번 → 줄바꿈·공백';
-  infoEl.textContent=mode==='bopomofo'?'Space는 공백, Enter는 줄바꿈입니다.':'Enter·Space: 버퍼 있으면 확정 / 연속 2번이면 줄바꿈·공백 | Shift+글자: 대문자도 예비창에 쌓여 성조 입력 가능';
   buildKeyboard();render();
 }
 
